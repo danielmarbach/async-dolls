@@ -23,26 +23,29 @@ namespace AsyncDolls
             };
         }
 
-        //public TransportMessage(BrokeredMessage message)
-        //{
-        //    Headers = new Dictionary<string, string>
-        //    {
-        //        {HeaderKeys.MessageId, message.MessageId},
-        //        {HeaderKeys.CorrelationId, message.CorrelationId},
-        //        {HeaderKeys.MessageType, message.ContentType},
-        //        {HeaderKeys.ReplyTo, message.ReplyTo}
-        //    };
+        public TransportMessage(TransportMessage message)
+        {
+            Headers = new Dictionary<string, string>
+            {
+                {HeaderKeys.MessageId, message.Id},
+                {HeaderKeys.CorrelationId, message.CorrelationId},
+                {HeaderKeys.MessageType, message.MessageType},
+                {HeaderKeys.ReplyTo, message.ReplyTo?.ToString() }
+            };
 
-        //    this.message = message;
+            var stream = new MemoryStream();
+            message.Body.Position = 0;
+            message.Body.CopyTo(stream);
+            this.SetBody(stream);
 
-        //    foreach (var pair in message.Properties)
-        //    {
-        //        if (!Headers.ContainsKey(pair.Key))
-        //        {
-        //            Headers.Add(pair.Key, (string) pair.Value);
-        //        }
-        //    }
-        //}
+            foreach (var pair in message.Headers)
+            {
+                if (!Headers.ContainsKey(pair.Key))
+                {
+                    Headers.Add(pair.Key, pair.Value);
+                }
+            }
+        }
 
         public string Id
         {
@@ -107,24 +110,6 @@ namespace AsyncDolls
 
             this.body = body;
         }
-
-        //public BrokeredMessage ToBrokeredMessage()
-        //{
-        //    var brokeredMessage = new BrokeredMessage(body, false)
-        //    {
-        //        ContentType = MessageType,
-        //        MessageId = Id,
-        //        CorrelationId = CorrelationId,
-        //        ReplyTo = ReplyTo != null ? ReplyTo.ToString() : null
-        //    };
-
-        //    foreach (KeyValuePair<string, string> pair in Headers)
-        //    {
-        //        brokeredMessage.Properties.Add(pair.Key, pair.Value);
-        //    }
-
-        //    return brokeredMessage;
-        //}
 
         //public Task DeadLetterAsync()
         //{
