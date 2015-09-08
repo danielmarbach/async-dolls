@@ -149,6 +149,12 @@
     <Compile Include="3-AsyncDolls\SendOnlyConfiguration.cs" />
     <Compile Include="3-AsyncDolls\SendOptions.cs" />
     <Compile Include="3-AsyncDolls\StringToAddressExtensions.cs" />
+    <Compile Include="3-AsyncDolls\Testing\AcceptanceTestHeaders.cs" />
+    <Compile Include="3-AsyncDolls\Testing\AlwaysRouteToDestination.cs" />
+    <Compile Include="3-AsyncDolls\Testing\Broker.cs" />
+    <Compile Include="3-AsyncDolls\Testing\BrokerExtensions.cs" />
+    <Compile Include="3-AsyncDolls\Testing\EnrichTransportMessageWithDestinationAddress.cs" />
+    <Compile Include="3-AsyncDolls\Testing\MessageUnit.cs" />
     <Compile Include="3-AsyncDolls\Topic.cs" />
     <Compile Include="3-AsyncDolls\TransportMessage.cs" />
     <Compile Include="Infrastructure\DanielMarbach.cs" />
