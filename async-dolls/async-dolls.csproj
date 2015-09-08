@@ -38,6 +38,14 @@
       <HintPath>..\packages\ApprovalUtilities.1.22.1\lib\net35\ApprovalUtilities.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="FluentAssertions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=33f2691a05b67b6a, processorArchitecture=MSIL">
+      <HintPath>..\packages\FluentAssertions.4.0.0\lib\net45\FluentAssertions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FluentAssertions.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=33f2691a05b67b6a, processorArchitecture=MSIL">
+      <HintPath>..\packages\FluentAssertions.4.0.0\lib\net45\FluentAssertions.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
       <Private>True</Private>
@@ -148,6 +156,14 @@
     <Compile Include="3-AsyncDolls\SendOnlyBus.cs" />
     <Compile Include="3-AsyncDolls\SendOnlyConfiguration.cs" />
     <Compile Include="3-AsyncDolls\SendOptions.cs" />
+    <Compile Include="3-AsyncDolls\Specs\AbortingMessageHandling.cs" />
+    <Compile Include="3-AsyncDolls\Specs\DeadLetterMessages.cs" />
+    <Compile Include="3-AsyncDolls\Specs\NumericAssertionExtensions.cs" />
+    <Compile Include="3-AsyncDolls\Specs\PublishingMessages.cs" />
+    <Compile Include="3-AsyncDolls\Specs\ReplyingToMessages.cs" />
+    <Compile Include="3-AsyncDolls\Specs\RoutingMessages.cs" />
+    <Compile Include="3-AsyncDolls\Specs\SendingMessages.cs" />
+    <Compile Include="3-AsyncDolls\Specs\SendingMessagesLocal.cs" />
     <Compile Include="3-AsyncDolls\StringToAddressExtensions.cs" />
     <Compile Include="3-AsyncDolls\Testing\AcceptanceTestHeaders.cs" />
     <Compile Include="3-AsyncDolls\Testing\AlwaysRouteToDestination.cs" />
