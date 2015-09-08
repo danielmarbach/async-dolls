@@ -38,6 +38,10 @@
       <HintPath>..\packages\ApprovalUtilities.1.22.1\lib\net35\ApprovalUtilities.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -67,11 +71,92 @@
     <Compile Include="2-AsyncTransactions\DatabaseStore.cs" />
     <Compile Include="2-AsyncTransactions\Script.cs" />
     <Compile Include="2-AsyncTransactions\SynchronousSaveResourceManager.cs" />
+    <Compile Include="3-AsyncDolls\Address.cs" />
+    <Compile Include="3-AsyncDolls\Bus.cs" />
+    <Compile Include="3-AsyncDolls\CombGuid.cs" />
+    <Compile Include="3-AsyncDolls\DeliveryOptions.cs" />
+    <Compile Include="3-AsyncDolls\Dequeuing\AsyncClosable.cs" />
+    <Compile Include="3-AsyncDolls\Dequeuing\DequeueStrategy.cs" />
+    <Compile Include="3-AsyncDolls\Dequeuing\IDequeueStrategy.cs" />
+    <Compile Include="3-AsyncDolls\Dequeuing\IReceiveMessages.cs" />
+    <Compile Include="3-AsyncDolls\Dequeuing\MessageReceiverEndpointConfigurationReadonlyExtensions.cs" />
+    <Compile Include="3-AsyncDolls\Dequeuing\MessageReceiverReceiver.cs" />
+    <Compile Include="3-AsyncDolls\Dequeuing\NoOpDequeStrategy.cs" />
+    <Compile Include="3-AsyncDolls\EndpointConfiguration.cs" />
+    <Compile Include="3-AsyncDolls\HeaderKeys.cs" />
+    <Compile Include="3-AsyncDolls\IBus.cs" />
+    <Compile Include="3-AsyncDolls\IBusForHandler.cs" />
+    <Compile Include="3-AsyncDolls\IHandleMessageAsync.cs" />
+    <Compile Include="3-AsyncDolls\MessageIntent.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\AlwaysRejectMessageHandler.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Context.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\HandlerRegistry.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\HandlerRegistryExtensions.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\IHandlerRegistry.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\IMessageSerializer.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\DateTimeExtensions.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\DeadLetterMessagesWhenRetryCountIsReachedStep.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\DeadLetterMessagesWhichCantBeDeserializedStep.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\DeserializeTransportMessageStep.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\EmptyIncomingPipelineFactory.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\ExceptionExtensions.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\FailureHeaderExtensions.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\IIncomingLogicalStep.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\IIncomingLogicalStepRegisterer.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\IIncomingPipelineFactory.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\IIncomingTransportStep.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\IIncomingTransportStepRegisterer.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\IncomingLogicalContext.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\IncomingPipeline.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\IncomingPipelineFactory.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\IncomingTransportContext.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\InvokeHandlerStep.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\LoadMessageHandlersStep.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\MessageHandler.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\ISupportSnapshots.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\LogicalMessage.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\LogicalMessageFactory.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\NewtonsoftJsonMessageSerializer.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\CreateTransportMessageStep.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\DetermineDestinationStep.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\DispatchToTransportStep.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\IMessageRouter.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\IOutgoingLogicalStep.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\IOutgoingLogicalStepRegisterer.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\IOutgoingPipelineFactory.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\IOutgoingTransportStep.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\IOutgoingTransportStepRegisterer.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\IPublishMessages.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\ISendMessages.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\MessagePublisher.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\MessagePublisherPublishOptionsExtensions.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\MessageRouterExtensions.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\MessageSender.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\MessageSenderSendOptionsExtensions.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\OutgoingLogicalContext.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\OutgoingPipeline.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\OutgoingPipelineFactory.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\OutgoingTransportContext.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\SendRessourceManager.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Outgoing\SerializeMessageStep.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\ShouldBeSnapshotted.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\SnapshotRegion.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\TypedHandlerRegistryExtensions.cs" />
+    <Compile Include="3-AsyncDolls\PublishOptions.cs" />
+    <Compile Include="3-AsyncDolls\Queue.cs" />
+    <Compile Include="3-AsyncDolls\ReplyOptions.cs" />
+    <Compile Include="3-AsyncDolls\SendOnlyBus.cs" />
+    <Compile Include="3-AsyncDolls\SendOnlyConfiguration.cs" />
+    <Compile Include="3-AsyncDolls\SendOptions.cs" />
+    <Compile Include="3-AsyncDolls\StringToAddressExtensions.cs" />
+    <Compile Include="3-AsyncDolls\Topic.cs" />
+    <Compile Include="3-AsyncDolls\TransportMessage.cs" />
     <Compile Include="Infrastructure\DanielMarbach.cs" />
     <Compile Include="Infrastructure\GiveAway.cs" />
     <Compile Include="Infrastructure\Slide.cs" />
     <Compile Include="Infrastructure\SlideExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\JetbrainsAnnotations.g.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="2-AsyncTransactions\DatabaseTests.StoreAsync.approved.txt" />
