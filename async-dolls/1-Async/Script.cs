@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
+using System.Windows.Threading;
 using NUnit.Framework;
 
 namespace AsyncDolls
@@ -64,6 +68,92 @@ namespace AsyncDolls
                 writer.Close();
                 stream.Close();
             }
+        }
+
+        [Test]
+        public async Task AsyncVoid()
+        {
+            var slide = new Slide(title: "Best Practices: async Task over async void");
+            await slide
+                .Sample(async () =>
+                {
+                    try
+                    {
+                        AvoidAsyncVoid();
+                    }
+                    catch (InvalidOperationException e)
+                    {
+                        // where is the exception?
+                        Console.WriteLine(e);
+                    }
+                    await Task.Delay(100);
+                });
+        }
+
+        static async void AvoidAsyncVoid() // Fire & Forget, can't be awaited, exception: EventHandlers
+        {
+            Console.WriteLine("Going inside async void.");
+            await Task.Delay(10);
+            Console.WriteLine("Going to throw soon");
+            throw new InvalidOperationException("Gotcha!");
+        }
+
+        [Test]
+        public async Task ConfigureAwait()
+        {
+            var slide = new Slide(title: "Best Practices: ConfigureAwait(false)");
+            await slide
+                .Sample(async () =>
+                {
+                    SynchronizationContext.SetSynchronizationContext(new Syncy("The context"));
+
+                    Console.WriteLine(SynchronizationContext.Current == null ? "Before IoBoundMethod2 without ConfigureAwait(false)" : SynchronizationContext.Current.ToString());
+
+                    await IoBoundMethod2(".\\IoBoundMethod2.txt");
+
+                    Console.WriteLine(SynchronizationContext.Current == null ? "Before IoBoundMethod2 with ConfigureAwait(false)" : SynchronizationContext.Current.ToString());
+
+                    await IoBoundMethod2(".\\IoBoundMethod2.txt").ConfigureAwait(false);
+
+                    Console.WriteLine(SynchronizationContext.Current == null ? "After IoBoundMethod2 with ConfigureAwait(false)" : SynchronizationContext.Current.ToString());
+                });
+        }
+
+        static async Task IoBoundMethod2(string path)
+        {
+            using (var stream = new FileStream(path, FileMode.OpenOrCreate))
+            using (var writer = new StreamWriter(stream))
+            {
+                Console.WriteLine(SynchronizationContext.Current == null ? "IoBoundMethod2" : SynchronizationContext.Current.ToString());
+                await writer.WriteLineAsync("Yehaa " + DateTime.Now);
+                Console.WriteLine(SynchronizationContext.Current == null ? "IoBoundMethod2" : SynchronizationContext.Current.ToString());
+                await writer.FlushAsync();
+                writer.Close();
+                stream.Close();
+            }
+        }
+
+        [Test]
+        public async Task DontMixBlockingAndAsync()
+        {
+            var slide = new Slide(title: "Best Practices: Don't mix blocking code with async. Async all the way!");
+            await slide
+                .Sample(() =>
+                {
+                    SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext()); // Let's simulate wpf stuff
+
+                    Delay(15); // what happens here? How can we fix this?
+                });
+        }
+
+        static void Delay(int milliseconds)
+        {
+            DelayAsync(milliseconds).Wait(); // Similar evilness is Thread.Sleep, Semaphore.Wait..
+        }
+
+        static async Task DelayAsync(int milliseconds)
+        {
+            await Task.Delay(milliseconds);
         }
     }
 }

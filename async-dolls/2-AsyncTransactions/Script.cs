@@ -27,12 +27,6 @@ namespace AsyncDolls
         [TestCase("EntityFramework")]
         public void TheStart(string EntityFramework = null)
         {
-            var daniel = new DanielMarbach();
-            daniel
-                .Is("CEO").Of("tracelight Gmbh").In("Switzerland")
-                .and
-                .WorkingFor("Particular Software").TheFolksBehind("NServiceBus");
-
             throw new ArgumentOutOfRangeException(nameof(EntityFramework), 
                 "Sorry this presentation is not about Entity Framework");
         }
