@@ -28,5 +28,10 @@ namespace AsyncDolls
         {
             return this;
         }
+
+        public DanielMarbach Reach(string me)
+        {
+            return this;
+        }
     }
 }
