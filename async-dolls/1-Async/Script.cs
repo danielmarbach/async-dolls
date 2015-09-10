@@ -151,44 +151,65 @@ namespace AsyncDolls
         [Test]
         public async Task ACompleteExampleMixingAsynchronousAndParallelProcessing()
         {
-            ConcurrentQueue<string> output = new ConcurrentQueue<string>();
-            int taskNumber = 0;
+            var output = new ConcurrentQueue<string>();
             var semaphore = new SemaphoreSlim(2);
             var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
             var token = tokenSource.Token;
-
             var scheduler = new QueuedTaskScheduler(TaskScheduler.Default, 2);
+
             try
             {
                 await Task.Factory.StartNew(async () =>
                 {
-                    while (!token.IsCancellationRequested)
-                    {
-                        await semaphore.WaitAsync(token);
+                    await Process(token, semaphore, output, scheduler);
 
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                        Task.Factory.StartNew(async () =>
-                        {
-                            int nr = Interlocked.Increment(ref taskNumber);
-                            output.Enqueue("Kick off " + nr + " " + Thread.CurrentThread.ManagedThreadId);
-                            await Task.Delay(5000).ConfigureAwait(false);
-                            output.Enqueue(" back " + nr + " " + Thread.CurrentThread.ManagedThreadId);
-                            semaphore.Release();
-                        }, token, TaskCreationOptions.AttachedToParent | TaskCreationOptions.HideScheduler, scheduler)
-                        .Unwrap();
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                    }
                 }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default)
-.Unwrap();
+                .Unwrap();
             }
             catch (OperationCanceledException)
             {
             }
 
+            PrintOUt(output);
+        }
+
+        private static void PrintOUt(ConcurrentQueue<string> output)
+        {
             foreach (var o in output)
             {
                 Console.WriteLine(o);
             }
+        }
+
+        private static async Task Process(CancellationToken token, SemaphoreSlim semaphore, ConcurrentQueue<string> output,
+            QueuedTaskScheduler scheduler)
+        {
+            while (!token.IsCancellationRequested)
+            {
+                await semaphore.WaitAsync(token);
+
+                InnerProcess(token, semaphore, output, scheduler);
+            }
+        }
+
+        private static void InnerProcess(CancellationToken token, SemaphoreSlim semaphore,
+            ConcurrentQueue<string> output,
+            QueuedTaskScheduler scheduler)
+        {
+            int taskNumber = 0;
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            Task.Factory.StartNew(async () =>
+            {
+                int nr = Interlocked.Increment(ref taskNumber);
+
+                output.Enqueue("Kick off " + nr + " " + Thread.CurrentThread.ManagedThreadId);
+                await Task.Delay(5000).ConfigureAwait(false);
+                output.Enqueue(" back " + nr + " " + Thread.CurrentThread.ManagedThreadId);
+
+                semaphore.Release();
+            }, token, TaskCreationOptions.AttachedToParent | TaskCreationOptions.HideScheduler, scheduler)
+                .Unwrap();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
     }
 }
