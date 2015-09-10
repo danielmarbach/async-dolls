@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -17,14 +17,6 @@ namespace AsyncDolls
     [TestFixture]
     public class AsyncScript
     {
-        [SetUp]
-        public void SetUp()
-        {
-        }
-
-
-
-
         [Test]
         public void ThatsMe()
         {
@@ -151,9 +143,52 @@ namespace AsyncDolls
             DelayAsync(milliseconds).Wait(); // Similar evilness is Thread.Sleep, Semaphore.Wait..
         }
 
-        static async Task DelayAsync(int milliseconds)
+        static Task DelayAsync(int milliseconds)
         {
-            await Task.Delay(milliseconds);
+            return Task.Delay(milliseconds);
+        }
+
+        [Test]
+        public async Task ACompleteExampleMixingAsynchronousAndParallelProcessing()
+        {
+            ConcurrentQueue<string> output = new ConcurrentQueue<string>();
+            int taskNumber = 0;
+            var semaphore = new SemaphoreSlim(2);
+            var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            var token = tokenSource.Token;
+
+            var scheduler = new QueuedTaskScheduler(TaskScheduler.Default, 2);
+            try
+            {
+                await Task.Factory.StartNew(async () =>
+                {
+                    while (!token.IsCancellationRequested)
+                    {
+                        await semaphore.WaitAsync(token);
+
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                        Task.Factory.StartNew(async () =>
+                        {
+                            int nr = Interlocked.Increment(ref taskNumber);
+                            output.Enqueue("Kick off " + nr + " " + Thread.CurrentThread.ManagedThreadId);
+                            await Task.Delay(5000).ConfigureAwait(false);
+                            output.Enqueue(" back " + nr + " " + Thread.CurrentThread.ManagedThreadId);
+                            semaphore.Release();
+                        }, token, TaskCreationOptions.AttachedToParent | TaskCreationOptions.HideScheduler, scheduler)
+                        .Unwrap();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                    }
+                }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default)
+.Unwrap();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+
+            foreach (var o in output)
+            {
+                Console.WriteLine(o);
+            }
         }
     }
 }

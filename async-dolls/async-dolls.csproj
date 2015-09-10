@@ -70,6 +70,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="1-Async\LimitedConcurrencyLevelTaskScheduler.cs" />
+    <Compile Include="1-Async\QueuedTaskScheduler.cs" />
     <Compile Include="1-Async\Script.cs" />
     <Compile Include="2-AsyncTransactions\AsynchronousBlockingResourceManager.cs" />
     <Compile Include="2-AsyncTransactions\AsyncPump.cs" />
