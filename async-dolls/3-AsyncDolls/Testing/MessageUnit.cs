@@ -14,6 +14,7 @@ namespace AsyncDolls.Testing
         readonly EndpointConfiguration configuration;
         readonly List<LogicalMessage> incomingLogical;
         readonly List<TransportMessage> incomingTransport;
+        readonly List<TransportMessage> deadLetter;
         readonly List<LogicalMessage> outgoingLogical;
         readonly List<TransportMessage> outgoingTransport;
         Func<TransportMessage, Task> outgoing;
@@ -26,34 +27,22 @@ namespace AsyncDolls.Testing
 
             outgoingTransport = new List<TransportMessage>();
             incomingTransport = new List<TransportMessage>();
+            deadLetter = new List<TransportMessage>();
             incomingLogical = new List<LogicalMessage>();
             outgoingLogical = new List<LogicalMessage>();
         }
 
-        public Address Endpoint
-        {
-            get { return configuration.EndpointQueue; }
-        }
+        public Address Endpoint => configuration.EndpointQueue;
 
-        public List<TransportMessage> OutgoingTransport
-        {
-            get { return outgoingTransport; }
-        }
+        public List<TransportMessage> DeadLetter => deadLetter;
 
-        public List<TransportMessage> IncomingTransport
-        {
-            get { return incomingTransport; }
-        }
+        public List<TransportMessage> OutgoingTransport => outgoingTransport;
 
-        public List<LogicalMessage> IncomingLogical
-        {
-            get { return incomingLogical; }
-        }
+        public List<TransportMessage> IncomingTransport => incomingTransport;
 
-        public List<LogicalMessage> OutgoingLogical
-        {
-            get { return outgoingLogical; }
-        }
+        public List<LogicalMessage> IncomingLogical => incomingLogical;
+
+        public List<LogicalMessage> OutgoingLogical => outgoingLogical;
 
         protected IHandlerRegistry Registry { get; set; }
         protected IMessageRouter Router { get; set; }
@@ -116,7 +105,7 @@ namespace AsyncDolls.Testing
 
         protected virtual IIncomingPipelineFactory CreateIncomingPipelineFactory()
         {
-            return new UnitIncomingPipelineFactory(Registry, IncomingLogical);
+            return new UnitIncomingPipelineFactory(Registry, IncomingLogical, DeadLetter);
         }
 
         protected virtual IOutgoingPipelineFactory CreateOutgoingPipelineFactory()
@@ -173,12 +162,14 @@ namespace AsyncDolls.Testing
 
         class UnitIncomingPipelineFactory : IIncomingPipelineFactory
         {
+            readonly ICollection<TransportMessage> deadLetter;
             readonly ICollection<LogicalMessage> incoming;
             readonly IHandlerRegistry registry;
 
-            public UnitIncomingPipelineFactory(IHandlerRegistry registry, ICollection<LogicalMessage> incoming)
+            public UnitIncomingPipelineFactory(IHandlerRegistry registry, ICollection<LogicalMessage> incoming, ICollection<TransportMessage> deadLetter)
             {
                 this.incoming = incoming;
+                this.deadLetter = deadLetter;
                 this.registry = registry;
             }
 
@@ -192,11 +183,12 @@ namespace AsyncDolls.Testing
                 var pipeline = new IncomingPipeline();
 
                 pipeline.Transport
-                    .Register(new DeadLetterMessagesWhichCantBeDeserializedStep())
+                    .Register(new DeadLetterMessagesWhichCantBeDeserializedStep(new TraceDeadLetter(deadLetter)))
                     .Register(new DeserializeTransportMessageStep(new NewtonsoftJsonMessageSerializer()));
 
                 pipeline.Logical
-                    .Register(new DeadLetterMessagesWhenRetryCountIsReachedStep())
+                    .Register(new RetryMessagesStep())
+                    .Register(new DeadLetterMessagesWhenRetryCountIsReachedStep(new TraceDeadLetter(deadLetter)))
                     .Register(new LoadMessageHandlersStep(registry))
                     .Register(new InvokeHandlerStep())
                     .Register(new TraceIncomingLogical(incoming));
@@ -297,6 +289,22 @@ namespace AsyncDolls.Testing
             {
                 collector.Add(context.LogicalMessage);
                 return next();
+            }
+        }
+
+        class TraceDeadLetter : IDeadLetterMessages
+        {
+            readonly ICollection<TransportMessage> collector;
+
+            public TraceDeadLetter(ICollection<TransportMessage> collector)
+            {
+                this.collector = collector;
+            }
+
+            public Task DeadLetterAsync(TransportMessage message)
+            {
+                collector.Add(message);
+                return Task.FromResult(0);
             }
         }
     }

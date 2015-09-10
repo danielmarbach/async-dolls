@@ -113,6 +113,7 @@
     <Compile Include="3-AsyncDolls\Pipeline\Incoming\EmptyIncomingPipelineFactory.cs" />
     <Compile Include="3-AsyncDolls\Pipeline\Incoming\ExceptionExtensions.cs" />
     <Compile Include="3-AsyncDolls\Pipeline\Incoming\FailureHeaderExtensions.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\IDeadLetterMessages.cs" />
     <Compile Include="3-AsyncDolls\Pipeline\Incoming\IIncomingLogicalStep.cs" />
     <Compile Include="3-AsyncDolls\Pipeline\Incoming\IIncomingLogicalStepRegisterer.cs" />
     <Compile Include="3-AsyncDolls\Pipeline\Incoming\IIncomingPipelineFactory.cs" />
@@ -125,6 +126,8 @@
     <Compile Include="3-AsyncDolls\Pipeline\Incoming\InvokeHandlerStep.cs" />
     <Compile Include="3-AsyncDolls\Pipeline\Incoming\LoadMessageHandlersStep.cs" />
     <Compile Include="3-AsyncDolls\Pipeline\Incoming\MessageHandler.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\NoOpDeadLetter.cs" />
+    <Compile Include="3-AsyncDolls\Pipeline\Incoming\RetryMessagesStep.cs" />
     <Compile Include="3-AsyncDolls\Pipeline\ISupportSnapshots.cs" />
     <Compile Include="3-AsyncDolls\Pipeline\LogicalMessage.cs" />
     <Compile Include="3-AsyncDolls\Pipeline\LogicalMessageFactory.cs" />

@@ -6,9 +6,15 @@ namespace AsyncDolls.Pipeline.Incoming
 {
     public class DeadLetterMessagesWhenRetryCountIsReachedStep : IIncomingLogicalStep
     {
+        private readonly IDeadLetterMessages deadLetter;
+
+        public DeadLetterMessagesWhenRetryCountIsReachedStep(IDeadLetterMessages deadLetter)
+        {
+            this.deadLetter = deadLetter;
+        }
+
         public async Task Invoke(IncomingLogicalContext context, IBusForHandler bus, Func<Task> next)
         {
-            ExceptionDispatchInfo serializationException = null;
             try
             {
                 await next()
@@ -16,27 +22,19 @@ namespace AsyncDolls.Pipeline.Incoming
             }
             catch (Exception exception)
             {
+                var message = context.TransportMessage;
                 if (IsRetryCountReached(context))
                 {
-                    // We can't do async in a catch block, therefore we have to capture the exception!
-                    serializationException = ExceptionDispatchInfo.Capture(exception);
+                    message.SetFailureHeaders(exception, "Max number of retries has been reached!");
+
+                    // C# 6 can do this!
+                    await deadLetter.DeadLetterAsync(message).ConfigureAwait(false);
                 }
                 else
                 {
+                    message.DeliveryCount++;
                     throw;
                 }
-            }
-
-            if (serializationException != null)
-            {
-                var message = context.TransportMessage;
-
-                message.SetFailureHeaders(serializationException.SourceException, "Max number of retries has been reached!");
-                //await message.DeadLetterAsync()
-                //    .ConfigureAwait(false);
-
-                // Because we instructed the message to deadletter it is safe to rethrow. The broker will not redeliver.
-                serializationException.Throw();
             }
         }
 

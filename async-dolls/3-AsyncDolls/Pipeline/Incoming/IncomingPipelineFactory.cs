@@ -21,11 +21,11 @@ namespace AsyncDolls.Pipeline.Incoming
             var pipeline = new IncomingPipeline();
 
             pipeline.Transport
-                .Register(new DeadLetterMessagesWhichCantBeDeserializedStep())
+                .Register(new DeadLetterMessagesWhichCantBeDeserializedStep(new NoOpDeadLetter()))
                 .Register(new DeserializeTransportMessageStep(new NewtonsoftJsonMessageSerializer()));
 
             pipeline.Logical
-                .Register(new DeadLetterMessagesWhenRetryCountIsReachedStep())
+                .Register(new DeadLetterMessagesWhenRetryCountIsReachedStep(new NoOpDeadLetter()))
                 .Register(new LoadMessageHandlersStep(registry))
                 .Register(new InvokeHandlerStep());
 

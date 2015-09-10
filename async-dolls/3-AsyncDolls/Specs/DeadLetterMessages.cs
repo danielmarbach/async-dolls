@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace AsyncDolls.Specs
 {
     using System;
@@ -50,16 +52,17 @@ namespace AsyncDolls.Specs
             writer.Flush();
             stream.Position = 0;
 
-            var tm = new DeadLetterTransportMessage
-            {
-                MessageType = typeof(Message).AssemblyQualifiedName
-            };
+            var tm = new TransportMessage { MessageType = typeof (Message).AssemblyQualifiedName };
             tm.SetBody(stream);
 
             Func<Task> action = () => receiver.HandOver(tm);
 
             action.ShouldThrow<SerializationException>();
-            tm.DeadLetterHeaders.Should().NotBeEmpty();
+            receiver.DeadLetter.Should().NotBeEmpty();
+
+            var transportMessage = receiver.DeadLetter.Single();
+            transportMessage.DeliveryCount.Should().Be(0);
+            transportMessage.Headers.Should().Contain(HeaderKeys.ExceptionReason, "Messages which can't be deserialized are deadlettered immediately");
         }
 
         [Test]
@@ -71,33 +74,17 @@ namespace AsyncDolls.Specs
             writer.Flush();
             stream.Position = 0;
 
-            var tm = new DeadLetterTransportMessage
-            {
-                MessageType = typeof(Message).AssemblyQualifiedName
-            };
+            var tm = new TransportMessage { MessageType = typeof(Message).AssemblyQualifiedName };
             tm.SetBody(stream);
 
             Func<Task> action = () => receiver.HandOver(tm);
 
-            action.ShouldThrow<InvalidOperationException>();
-            tm.DeadLetterHeaders.Should().NotBeEmpty();
-        }
+            action.ShouldNotThrow();
+            receiver.DeadLetter.Should().NotBeEmpty();
 
-        public class DeadLetterTransportMessage : TransportMessage
-        {
-            public IDictionary<string, object> DeadLetterHeaders { get; private set; }
-
-            public override int DeliveryCount
-            {
-                get { return 10; }
-            }
-
-            //protected override Task DeadLetterAsyncInternal(IDictionary<string, object> deadLetterHeaders)
-            //{
-            //    DeadLetterHeaders = deadLetterHeaders;
-
-            //    return Task.FromResult(0);
-            //}
+            var transportMessage = receiver.DeadLetter.Single();
+            transportMessage.DeliveryCount.Should().Be(10);
+            transportMessage.Headers.Should().Contain(HeaderKeys.ExceptionReason, "Max number of retries has been reached!");
         }
 
         public class HandlerRegistrySimulator : HandlerRegistry

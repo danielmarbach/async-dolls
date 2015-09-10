@@ -44,19 +44,19 @@
         }
 
         [Test]
-        public async Task WhenOneMessagePublished_InvokesSynchronousAndAsynchronousHandlers()
+        public async Task WhenOneMessagePublished_InvokesAllHandlers()
         {
             await publisher.Publish(new Event
             {
                 Bar = 42
             });
 
-            context.AsyncHandlerCalled.Should().BeInvokedOnce();
-            context.HandlerCalled.Should().BeInvokedOnce();
+            context.FirstHandlerCalled.Should().BeInvokedOnce();
+            context.SecondHandlerCalled.Should().BeInvokedOnce();
         }
 
         [Test]
-        public async Task WhenMultipeMessagePublished_InvokesSynchronousAndAsynchronousHandlers()
+        public async Task WhenMultipeMessagePublished_InvokesAllHandlersForEachMessage()
         {
             await publisher.Publish(new Event
             {
@@ -67,8 +67,8 @@
                 Bar = 43
             });
 
-            context.AsyncHandlerCalled.Should().BeInvokedTwice();
-            context.HandlerCalled.Should().BeInvokedTwice();
+            context.FirstHandlerCalled.Should().BeInvokedTwice();
+            context.SecondHandlerCalled.Should().BeInvokedTwice();
         }
 
         [Test]
@@ -85,9 +85,9 @@
                 Bar = 42
             }, publishOptions);
 
-            context.HandlerCaughtHeaders.Should()
+            context.SecondHandlerCaughtHeaders.Should()
                 .Contain(HeaderKey, HeaderValue);
-            context.AsyncHandlerCaughtHeaders.Should()
+            context.FirstcHandlerCaughtHeaders.Should()
                 .Contain(HeaderKey, HeaderValue);
         }
 
@@ -105,44 +105,44 @@
                 if (messageType == typeof(Event))
                 {
                     return this.ConsumeWith(
-                        new AsyncMessageHandler(context),
-                        new MessageHandler(context));
+                        new FirstHandler(context),
+                        new SecondHandler(context));
                 }
 
                 return this.ConsumeAll();
             }
         }
 
-        public class AsyncMessageHandler : IHandleMessageAsync<Event>
+        public class FirstHandler : IHandleMessageAsync<Event>
         {
             readonly Context context;
 
-            public AsyncMessageHandler(Context context)
+            public FirstHandler(Context context)
             {
                 this.context = context;
             }
 
             public Task Handle(Event message, IBusForHandler bus)
             {
-                context.AsyncHandlerCalled += 1;
-                context.AsyncHandlerCaughtHeaders = bus.Headers(message);
+                context.FirstHandlerCalled += 1;
+                context.FirstcHandlerCaughtHeaders = bus.Headers(message);
                 return Task.FromResult(0);
             }
         }
 
-        public class MessageHandler : IHandleMessageAsync<Event>
+        public class SecondHandler : IHandleMessageAsync<Event>
         {
             readonly Context context;
 
-            public MessageHandler(Context context)
+            public SecondHandler(Context context)
             {
                 this.context = context;
             }
 
             public Task Handle(Event message, IBusForHandler bus)
             {
-                context.HandlerCalled += 1;
-                context.HandlerCaughtHeaders = bus.Headers(message);
+                context.SecondHandlerCalled += 1;
+                context.SecondHandlerCaughtHeaders = bus.Headers(message);
                 return Task.FromResult(0);
             }
         }
@@ -154,10 +154,10 @@
 
         public class Context
         {
-            public int AsyncHandlerCalled { get; set; }
-            public int HandlerCalled { get; set; }
-            public IDictionary<string, string> AsyncHandlerCaughtHeaders { get; set; }
-            public IDictionary<string, string> HandlerCaughtHeaders { get; set; }
+            public int FirstHandlerCalled { get; set; }
+            public int SecondHandlerCalled { get; set; }
+            public IDictionary<string, string> FirstcHandlerCaughtHeaders { get; set; }
+            public IDictionary<string, string> SecondHandlerCaughtHeaders { get; set; }
         }
     }
 }

@@ -7,7 +7,7 @@ namespace AsyncDolls.Testing
 
     public class EnrichTransportMessageWithDestinationAddress : IOutgoingTransportStep
     {
-        public async Task Invoke(OutgoingTransportContext context, Func<Task> next)
+        public Task Invoke(OutgoingTransportContext context, Func<Task> next)
         {
             var sendOptions = context.Options as SendOptions;
             if (sendOptions != null)
@@ -21,7 +21,7 @@ namespace AsyncDolls.Testing
                 context.OutgoingTransportMessage.Headers[AcceptanceTestHeaders.Destination] = publishOptions.Topic.ToString();
             }
 
-            await next();
+            return next();
         }
     }
 }

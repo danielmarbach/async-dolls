@@ -42,32 +42,32 @@ namespace AsyncDolls.Specs
         }
 
         [Test]
-        public async Task WhenPipelineAbortedAsync_ShouldNotContinueToSyncHandler()
+        public async Task WhenPipelineAbortedFirstHandler_ShouldNotContinueToSecondHandler()
         {
             await sender.Send(new Message
             {
-                AbortAsync = true,
-                AbortSync = false,
+                AbortFirstHandler = true,
+                AbortSecondHandler = false,
                 Bar = 42
             });
 
-            context.AsyncHandlerCalled.Should().BeInvokedOnce();
-            context.HandlerCalled.Should().NotBeInvoked();
+            context.FirstHandlerCalled.Should().BeInvokedOnce();
+            context.SecondHandlerCalled.Should().NotBeInvoked();
             context.LastHandlerCalled.Should().NotBeInvoked();
         }
 
         [Test]
-        public async Task WhenPipelineAbortedSync_ShouldNotContinueToLastHandler()
+        public async Task WhenPipelineAbortedSecondHandler_ShouldNotContinueToLastHandler()
         {
             await sender.Send(new Message
             {
-                AbortAsync = false,
-                AbortSync = true,
+                AbortFirstHandler = false,
+                AbortSecondHandler = true,
                 Bar = 42
             });
 
-            context.AsyncHandlerCalled.Should().BeInvokedOnce();
-            context.HandlerCalled.Should().BeInvokedOnce();
+            context.FirstHandlerCalled.Should().BeInvokedOnce();
+            context.SecondHandlerCalled.Should().BeInvokedOnce();
             context.LastHandlerCalled.Should().NotBeInvoked();
         }
 
@@ -76,13 +76,13 @@ namespace AsyncDolls.Specs
         {
             await sender.Send(new Message
             {
-                AbortAsync = false,
-                AbortSync = false,
+                AbortFirstHandler = false,
+                AbortSecondHandler = false,
                 Bar = 42
             });
 
-            context.AsyncHandlerCalled.Should().BeInvokedOnce();
-            context.HandlerCalled.Should().BeInvokedOnce();
+            context.FirstHandlerCalled.Should().BeInvokedOnce();
+            context.SecondHandlerCalled.Should().BeInvokedOnce();
             context.LastHandlerCalled.Should().BeInvokedOnce();
         }
 
@@ -100,7 +100,8 @@ namespace AsyncDolls.Specs
                 if (messageType == typeof(Message))
                 {
                     return this.ConsumeWith(
-                        new AsyncMessageHandler(context),
+                        new FirstHandler(context),
+                        new SecondHandler(context),
                         new LastHandler(context));
                 }
 
@@ -108,20 +109,20 @@ namespace AsyncDolls.Specs
             }
         }
 
-        public class AsyncMessageHandler : IHandleMessageAsync<Message>
+        public class FirstHandler : IHandleMessageAsync<Message>
         {
             readonly Context context;
 
-            public AsyncMessageHandler(Context context)
+            public FirstHandler(Context context)
             {
                 this.context = context;
             }
 
             public Task Handle(Message message, IBusForHandler bus)
             {
-                context.AsyncHandlerCalled += 1;
+                context.FirstHandlerCalled += 1;
 
-                if (message.AbortAsync)
+                if (message.AbortFirstHandler)
                 {
                     bus.DoNotContinueDispatchingCurrentMessageToHandlers();
                 }
@@ -130,20 +131,20 @@ namespace AsyncDolls.Specs
             }
         }
 
-        public class MessageHandler : IHandleMessageAsync<Message>
+        public class SecondHandler : IHandleMessageAsync<Message>
         {
             readonly Context context;
 
-            public MessageHandler(Context context)
+            public SecondHandler(Context context)
             {
                 this.context = context;
             }
 
             public Task Handle(Message message, IBusForHandler bus)
             {
-                context.HandlerCalled += 1;
+                context.SecondHandlerCalled += 1;
 
-                if (message.AbortSync)
+                if (message.AbortSecondHandler)
                 {
                     bus.DoNotContinueDispatchingCurrentMessageToHandlers();
                 }
@@ -170,15 +171,15 @@ namespace AsyncDolls.Specs
 
         public class Message
         {
-            public bool AbortAsync { get; set; }
-            public bool AbortSync { get; set; }
+            public bool AbortFirstHandler { get; set; }
+            public bool AbortSecondHandler { get; set; }
             public int Bar { get; set; }
         }
 
         public class Context
         {
-            public int AsyncHandlerCalled { get; set; }
-            public int HandlerCalled { get; set; }
+            public int FirstHandlerCalled { get; set; }
+            public int SecondHandlerCalled { get; set; }
             public int LastHandlerCalled { get; set; }
         }
     }

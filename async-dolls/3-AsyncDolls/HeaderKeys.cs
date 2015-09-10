@@ -8,6 +8,7 @@ namespace AsyncDolls
         public const string CorrelationId = HeaderPrefix + "CorrelationId";
         public const string ReplyTo = HeaderPrefix + "ReplyTo";
         public const string MessageIntent = HeaderPrefix + "MessageIntent";
+        public const string DeliveryCount = HeaderPrefix + "DeliveryCount";
         public const string FailurePrefix = HeaderPrefix + "Failure.";
         public const string ExceptionReason = FailurePrefix + "Exception.Reason";
         public const string ExceptionType = FailurePrefix + "Exception.ExceptionType";

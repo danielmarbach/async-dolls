@@ -19,7 +19,8 @@ namespace AsyncDolls
                 {HeaderKeys.ContentType, null},
                 {HeaderKeys.ReplyTo, null},
                 {HeaderKeys.MessageType, null},
-                {HeaderKeys.MessageIntent, null}
+                {HeaderKeys.MessageIntent, null},
+                {HeaderKeys.DeliveryCount, "0" }
             };
         }
 
@@ -36,6 +37,7 @@ namespace AsyncDolls
             var stream = new MemoryStream();
             message.Body.Position = 0;
             message.Body.CopyTo(stream);
+            stream.Position = 0;
             this.SetBody(stream);
 
             foreach (var pair in message.Headers)
@@ -91,7 +93,8 @@ namespace AsyncDolls
 
         public virtual int DeliveryCount
         {
-            get { return 0; }
+            get { return int.Parse(Headers[HeaderKeys.DeliveryCount]); }
+            set { Headers[HeaderKeys.DeliveryCount] = value.ToString(); }
         }
 
         public IDictionary<string, string> Headers { get; private set; }
