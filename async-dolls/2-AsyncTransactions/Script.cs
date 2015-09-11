@@ -38,43 +38,18 @@ namespace AsyncDolls
 
 
         [Test]
-        public async Task TransactionScopeIntroOrRefresh()
+        public void TransactionScopeIntroOrRefresh()
         {
-            var slide = new Slide(title: "Transaction Scope Intro");
-            await slide
-                .BulletPoint("System.Transactions.TransactionScope")
-                .BulletPoint("Implicit programing model / Ambient Transactions")
-                .BulletPoint("Only works with async/await in .NET 4.5.1")
-                .BulletPoint("Limited usefulness in cloud scenarios")
-                .BulletPoint("Upgrades a local transaction to a distributed transaction")
-                .BulletPoint("Ease of coding - If you prefer implicit over explicit")
+            using (var tx = new TransactionScope())
+            {
+                Assert.NotNull(Transaction.Current);
 
+                SomeMethodInTheCallStack();
 
+                tx.Complete();
+            }
 
-
-
-
-
-
-
-
-
-
-                .Sample(() =>
-                {
-                    Assert.Null(Transaction.Current);
-
-                    using (var tx = new TransactionScope())
-                    {
-                        Assert.NotNull(Transaction.Current);
-
-                        SomeMethodInTheCallStack();
-
-                        tx.Complete();
-                    }
-
-                    Assert.Null(Transaction.Current);
-                });
+            Assert.Null(Transaction.Current);
         }
 
         private static void SomeMethodInTheCallStack()
@@ -88,49 +63,38 @@ namespace AsyncDolls
         [ExpectedException(typeof(InvalidOperationException))] // Normally never use those
         public async Task TransactionScopeAsync()
         {
-            var slide = new Slide(title: "Transaction Scope Async");
-            await slide
+            Assert.Null(Transaction.Current);
 
-                .Sample(async () =>
-                {
-                    Assert.Null(Transaction.Current);
+            using (var tx = new TransactionScope())
+            {
+                Assert.NotNull(Transaction.Current);
 
-                    using (var tx = new TransactionScope())
-                    {
-                        Assert.NotNull(Transaction.Current);
+                await SomeMethodInTheCallStackAsync()
+                    .ConfigureAwait(false);
 
-                        await SomeMethodInTheCallStackAsync()
-                            .ConfigureAwait(false);
+                tx.Complete();
+            }
 
-                        tx.Complete();
-                    }
-
-                    Assert.Null(Transaction.Current);
-                });
+            Assert.Null(Transaction.Current);
         }
 
         [Test]
         public async Task TransactionScopeAsyncProper()
         {
-            var slide = new Slide(title: "Transaction Scope Async");
-            await slide
-                .Sample(async () =>
-                {
-                    Assert.Null(Transaction.Current);
+            Assert.Null(Transaction.Current);
 
-                    using (var tx = 
-                        new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-                    {
-                        Assert.NotNull(Transaction.Current);
+            using (var tx =
+                new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                Assert.NotNull(Transaction.Current);
 
-                        await SomeMethodInTheCallStackAsync()
-                            .ConfigureAwait(false);
+                await SomeMethodInTheCallStackAsync()
+                    .ConfigureAwait(false);
 
-                        tx.Complete();
-                    }
+                tx.Complete();
+            }
 
-                    Assert.Null(Transaction.Current);
-                });
+            Assert.Null(Transaction.Current);
         }
 
         private static async Task SomeMethodInTheCallStackAsync()
@@ -147,24 +111,17 @@ namespace AsyncDolls
         [TestCase(DatabaseMode.AsyncBlocking)]
         public async Task StoreAsync(DatabaseMode mode)
         {
-            var slide = new Slide(title: "Store Async");
-            await slide
-                .BulletPoint("OMG! You just rolled your own NoSQL database, right?")
+            var database = new Database("StoreAsync.received.txt", mode);
+            StoringTenSwissGuysInTheDatabase(database);
 
-                .Sample(async () =>
-                {
-                    var database = new Database("StoreAsync.received.txt", mode);
-                    StoringTenSwissGuysInTheDatabase(database);
-
-                    try
-                    {
-                        await database.SaveAsync().ConfigureAwait(false);
-                    }
-                    finally
-                    {
-                        database.Close();
-                    }
-                });
+            try
+            {
+                await database.SaveAsync().ConfigureAwait(false);
+            }
+            finally
+            {
+                database.Close();
+            }
         }
 
         [Test]
@@ -174,22 +131,17 @@ namespace AsyncDolls
         [TestCase(DatabaseMode.AsyncBlocking)]
         public async Task StoreAsyncSupportsAmbientTransactionComplete(DatabaseMode mode)
         {
-            var slide = new Slide(title: "Store Async supports ambient transactions - complete");
-            await slide
-                .Sample(async () =>
-                {
-                    var database = new Database("StoreAsyncSupportsAmbientTransactionComplete.received.txt", mode);
-                    StoringTenSwissGuysInTheDatabase(database);
+            var database = new Database("StoreAsyncSupportsAmbientTransactionComplete.received.txt", mode);
+            StoringTenSwissGuysInTheDatabase(database);
 
-                    using (var tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-                    {
-                        await database.SaveAsync().ConfigureAwait(false);
+            using (var tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                await database.SaveAsync().ConfigureAwait(false);
 
-                        tx.Complete();
-                    }
+                tx.Complete();
+            }
 
-                    database.Close();
-                });
+            database.Close();
         }
 
         [Test]
@@ -199,22 +151,17 @@ namespace AsyncDolls
         [TestCase(DatabaseMode.AsyncBlocking)]
         public async Task StoreAsyncSupportsAmbientTransactionRollback(DatabaseMode mode)
         {
-            var slide = new Slide(title: "Store Async supports ambient transactions - rollback");
-            await slide
-                .Sample(async () =>
-                {
-                    var database = new Database("StoreAsyncSupportsAmbientTransactionRollback.received.txt", mode);
-                    StoringTenSwissGuysInTheDatabase(database);
+            var database = new Database("StoreAsyncSupportsAmbientTransactionRollback.received.txt", mode);
+            StoringTenSwissGuysInTheDatabase(database);
 
-                    using (var tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-                    {
-                        await database.SaveAsync().ConfigureAwait(false);
+            using (var tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                await database.SaveAsync().ConfigureAwait(false);
 
-                        // Rollback
-                    }
+                // Rollback
+            }
 
-                    database.Close();
-                });
+            database.Close();
         }
 
 

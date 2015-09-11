@@ -35,17 +35,12 @@ namespace AsyncDolls
         [Test]
         public async Task AsyncRecap()
         {
-            var slide = new Slide(title: "Asynchronous vs. Parallel");
-            await slide
-                .Sample(async () =>
-                {
-                    // Parallel
-                    Parallel.For(0, 1000, CpuBoundMethod); // or Parallel.ForEach
-                    await Task.Run(() => CpuBoundMethod(10)); // or Task.Factory.StartNew(), if in doubt use Task.Run
+            // Parallel
+            Parallel.For(0, 1000, CpuBoundMethod); // or Parallel.ForEach
+            await Task.Run(() => CpuBoundMethod(10)); // or Task.Factory.StartNew(), if in doubt use Task.Run
 
-                    // Asynchronous
-                    await IoBoundMethod(".\\IoBoundMethod.txt"); // if true IOBound don't use Task.Run, StartNew
-                });
+            // Asynchronous
+            await IoBoundMethod(".\\IoBoundMethod.txt"); // if true IOBound don't use Task.Run, StartNew
         }
 
         static void CpuBoundMethod(int i)
@@ -68,21 +63,16 @@ namespace AsyncDolls
         [Test]
         public async Task AsyncVoid()
         {
-            var slide = new Slide(title: "Best Practices: async Task over async void");
-            await slide
-                .Sample(async () =>
-                {
-                    try
-                    {
-                        AvoidAsyncVoid();
-                    }
-                    catch (InvalidOperationException e)
-                    {
-                        // where is the exception?
-                        Console.WriteLine(e);
-                    }
-                    await Task.Delay(100);
-                });
+            try
+            {
+                AvoidAsyncVoid();
+            }
+            catch (InvalidOperationException e)
+            {
+                // where is the exception?
+                Console.WriteLine(e);
+            }
+            await Task.Delay(100);
         }
 
         static async void AvoidAsyncVoid() // Fire & Forget, can't be awaited, exception: EventHandlers
@@ -96,22 +86,17 @@ namespace AsyncDolls
         [Test]
         public async Task ConfigureAwait()
         {
-            var slide = new Slide(title: "Best Practices: ConfigureAwait(false)");
+            // Attention: In unit test everything behaves differently, I'll explain why
             // ReSharper disable once PossibleNullReferenceException
             await Process.Start(new ProcessStartInfo(@".\configureawait.exe") { UseShellExecute = false });
         }
 
         [Test]
-        public async Task DontMixBlockingAndAsync()
+        public void DontMixBlockingAndAsync()
         {
-            var slide = new Slide(title: "Best Practices: Don't mix blocking code with async. Async all the way!");
-            await slide
-                .Sample(() =>
-                {
-                    SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext()); // Let's simulate wpf stuff
+            SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext()); // Let's simulate wpf stuff
 
-                    Delay(15); // what happens here? How can we fix this?
-                });
+            Delay(15); // what happens here? How can we fix this?
         }
 
         static void Delay(int milliseconds)
