@@ -188,16 +188,6 @@ namespace AsyncDolls
 
 
 
-        [Test]
-        [Explicit]
-        public async Task TheEnd()
-        {
-            var giveAway = new GiveAway();
-            await giveAway.WorthThousandDollars();
-        }
-
-
-
 
 
 
