@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.ExceptionServices;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
@@ -32,11 +31,6 @@ namespace AsyncDolls.Pipeline.Incoming
                 // Because we instructed the message to deadletter it is safe to rethrow. The broker will not redeliver.
                 throw;
             }
-        }
-
-        static bool SerializationExceptionHasBeenCaught(ExceptionDispatchInfo serializationException)
-        {
-            return serializationException != null;
         }
     }
 }
