@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "async-dolls", "async-dolls\async-dolls.csproj", "{B2755821-FB74-4D92-B54C-3DC778B5CD64}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "configureawait", "configureawait\configureawait.csproj", "{11D966E5-54C8-48E4-B4BC-F2248C9CDEEF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{B2755821-FB74-4D92-B54C-3DC778B5CD64}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2755821-FB74-4D92-B54C-3DC778B5CD64}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2755821-FB74-4D92-B54C-3DC778B5CD64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11D966E5-54C8-48E4-B4BC-F2248C9CDEEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11D966E5-54C8-48E4-B4BC-F2248C9CDEEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11D966E5-54C8-48E4-B4BC-F2248C9CDEEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11D966E5-54C8-48E4-B4BC-F2248C9CDEEF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

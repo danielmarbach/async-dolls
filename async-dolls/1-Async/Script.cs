@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -94,35 +97,8 @@ namespace AsyncDolls
         public async Task ConfigureAwait()
         {
             var slide = new Slide(title: "Best Practices: ConfigureAwait(false)");
-            await slide
-                .Sample(async () =>
-                {
-                    SynchronizationContext.SetSynchronizationContext(new Syncy("The context"));
-
-                    Console.WriteLine(SynchronizationContext.Current == null ? "Before IoBoundMethod2 without ConfigureAwait(false)" : SynchronizationContext.Current.ToString());
-
-                    await IoBoundMethod2(".\\IoBoundMethod2.txt");
-
-                    Console.WriteLine(SynchronizationContext.Current == null ? "Before IoBoundMethod2 with ConfigureAwait(false)" : SynchronizationContext.Current.ToString());
-
-                    await IoBoundMethod2(".\\IoBoundMethod2.txt").ConfigureAwait(false);
-
-                    Console.WriteLine(SynchronizationContext.Current == null ? "After IoBoundMethod2 with ConfigureAwait(false)" : SynchronizationContext.Current.ToString());
-                });
-        }
-
-        static async Task IoBoundMethod2(string path)
-        {
-            using (var stream = new FileStream(path, FileMode.OpenOrCreate))
-            using (var writer = new StreamWriter(stream))
-            {
-                Console.WriteLine(SynchronizationContext.Current == null ? "IoBoundMethod2" : SynchronizationContext.Current.ToString());
-                await writer.WriteLineAsync("Yehaa " + DateTime.Now);
-                Console.WriteLine(SynchronizationContext.Current == null ? "IoBoundMethod2" : SynchronizationContext.Current.ToString());
-                await writer.FlushAsync();
-                writer.Close();
-                stream.Close();
-            }
+            // ReSharper disable once PossibleNullReferenceException
+            await Process.Start(new ProcessStartInfo(@".\configureawait.exe") { UseShellExecute = false });
         }
 
         [Test]
@@ -151,65 +127,70 @@ namespace AsyncDolls
         [Test]
         public async Task ACompleteExampleMixingAsynchronousAndParallelProcessing()
         {
-            var output = new ConcurrentQueue<string>();
-            var semaphore = new SemaphoreSlim(2);
+            var runningTasks = new ConcurrentDictionary<Task, Task>();
+            var semaphore = new SemaphoreSlim(1);
             var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
             var token = tokenSource.Token;
             var scheduler = new QueuedTaskScheduler(TaskScheduler.Default, 2);
 
             try
             {
-                await Task.Factory.StartNew(async () =>
+                var pumpTask = Task.Factory.StartNew(async () =>
                 {
-                    await Process(token, semaphore, output, scheduler);
+                    int taskNumber = 0;
+                    while (!token.IsCancellationRequested)
+                    {
+                        await semaphore.WaitAsync(token);
 
-                }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default)
+                        var task = Task.Factory.StartNew(async () =>
+                        {
+                            int nr = Interlocked.Increment(ref taskNumber);
+
+                            Console.WriteLine("Kick off " + nr + " " + Thread.CurrentThread.ManagedThreadId);
+                            await Task.Delay(1000).ConfigureAwait(false);
+                            Console.WriteLine(" back " + nr + " " + Thread.CurrentThread.ManagedThreadId);
+
+                            semaphore.Release();
+                        }, CancellationToken.None, TaskCreationOptions.HideScheduler, scheduler)
+                        .Unwrap();
+
+                        task.ContinueWith(t =>
+                        {
+                            Task wayne;
+                            runningTasks.TryRemove(t, out wayne);
+                        }, TaskContinuationOptions.ExecuteSynchronously).Ignore();
+
+                        runningTasks.AddOrUpdate(task, task, (k, v) => task).Ignore();
+                    }
+                }, token, TaskCreationOptions.LongRunning, TaskScheduler.Default)
                 .Unwrap();
+
+                await pumpTask;
             }
             catch (OperationCanceledException)
             {
             }
 
-            PrintOUt(output);
+            await Task.WhenAll(runningTasks.Values);
         }
+    }
 
-        private static void PrintOUt(ConcurrentQueue<string> output)
+    static class TaskExtensions
+    {
+        public static void Ignore(this Task task)
         {
-            foreach (var o in output)
-            {
-                Console.WriteLine(o);
-            }
         }
+    }
 
-        private static async Task Process(CancellationToken token, SemaphoreSlim semaphore, ConcurrentQueue<string> output,
-            QueuedTaskScheduler scheduler)
+    public static class ProcessExtensions
+    {
+        public static TaskAwaiter<int> GetAwaiter(this Process process)
         {
-            while (!token.IsCancellationRequested)
-            {
-                await semaphore.WaitAsync(token);
-
-                InnerProcess(token, semaphore, output, scheduler);
-            }
-        }
-
-        private static void InnerProcess(CancellationToken token, SemaphoreSlim semaphore,
-            ConcurrentQueue<string> output,
-            QueuedTaskScheduler scheduler)
-        {
-            int taskNumber = 0;
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-            Task.Factory.StartNew(async () =>
-            {
-                int nr = Interlocked.Increment(ref taskNumber);
-
-                output.Enqueue("Kick off " + nr + " " + Thread.CurrentThread.ManagedThreadId);
-                await Task.Delay(5000).ConfigureAwait(false);
-                output.Enqueue(" back " + nr + " " + Thread.CurrentThread.ManagedThreadId);
-
-                semaphore.Release();
-            }, token, TaskCreationOptions.AttachedToParent | TaskCreationOptions.HideScheduler, scheduler)
-                .Unwrap();
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            var tcs = new TaskCompletionSource<int>();
+            process.EnableRaisingEvents = true;
+            process.Exited += (s, e) => tcs.TrySetResult(process.ExitCode);
+            if (process.HasExited) tcs.TrySetResult(process.ExitCode);
+            return tcs.Task.GetAwaiter();
         }
     }
 }
