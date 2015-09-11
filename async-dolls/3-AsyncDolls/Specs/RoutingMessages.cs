@@ -67,10 +67,10 @@
                 Bar = 42
             });
 
-            context.AsyncReceiverOneCalled.Should().BeInvokedOnce();
-            context.SyncReceiverOneCalled.Should().BeInvokedOnce();
-            context.AsyncReceiverTwoCalled.Should().BeInvokedOnce();
-            context.SyncReceiverTwoCalled.Should().BeInvokedOnce();
+            context.FirstHandlerReceiverOneCalls.Should().BeInvokedOnce();
+            context.SecondHandlerReceiverOneCalls.Should().BeInvokedOnce();
+            context.FirstHandlerReceiverTwoCalls.Should().BeInvokedOnce();
+            context.SecondHandlerReceiverTwoCalls.Should().BeInvokedOnce();
         }
 
         [Test]
@@ -86,13 +86,13 @@
                 Bar = 42
             }, sendOptions);
 
-            context.AsyncReceiverOneCalled.Should().NotBeInvoked();
-            context.SyncReceiverOneCalled.Should().NotBeInvoked();
-            context.AsyncReceiverTwoCalled.Should().NotBeInvoked();
-            context.SyncReceiverTwoCalled.Should().NotBeInvoked();
+            context.FirstHandlerReceiverOneCalls.Should().NotBeInvoked();
+            context.SecondHandlerReceiverOneCalls.Should().NotBeInvoked();
+            context.FirstHandlerReceiverTwoCalls.Should().NotBeInvoked();
+            context.SecondHandlerReceiverTwoCalls.Should().NotBeInvoked();
 
-            context.AsyncReceiverThreeCalled.Should().BeInvokedOnce();
-            context.SyncReceiverThreeCalled.Should().BeInvokedOnce();
+            context.FirstHandlerReceiverThreeCalls.Should().BeInvokedOnce();
+            context.SecondHandlerReceiverThreeCalls.Should().BeInvokedOnce();
         }
 
         class Router : IMessageRouter
@@ -127,120 +127,120 @@
                 if (messageType == typeof(MessageForReceiverOne))
                 {
                     return this.ConsumeWith(
-                        new AsyncMessageHandlerReceiverOne(context),
-                        new MessageHandlerReceiverOne(context));
+                        new FirstHandlerReceiverOne(context),
+                        new SecondHandlerReceiverOne(context));
                 }
 
                 if (messageType == typeof(MessageForReceiverTwo))
                 {
                     return this.ConsumeWith(
-                        new AsyncMessageHandlerReceiverTwo(context),
-                        new MessageHandlerReceiverTwo(context));
+                        new FirstHandlerReceiverTwo(context),
+                        new SecondHandlerReceiverTwo(context));
                 }
 
                 if (messageType == typeof(MessageForReceiverThree))
                 {
                     return this.ConsumeWith(
-                        new AsyncMessageHandlerReceiverThree(context),
-                        new MessageHandlerReceiverThree(context));
+                        new FirstHandlerReceiverThree(context),
+                        new SecondHandlerReceiverThree(context));
                 }
 
                 return this.ConsumeAll();
             }
         }
 
-        public class AsyncMessageHandlerReceiverOne : IHandleMessageAsync<MessageForReceiverOne>
+        public class FirstHandlerReceiverOne : IHandleMessageAsync<MessageForReceiverOne>
         {
             readonly Context context;
 
-            public AsyncMessageHandlerReceiverOne(Context context)
+            public FirstHandlerReceiverOne(Context context)
             {
                 this.context = context;
             }
 
             public Task Handle(MessageForReceiverOne message, IBusForHandler bus)
             {
-                context.AsyncReceiverOneCalled += 1;
+                context.FirstHandlerReceiverOneCalls += 1;
                 return Task.FromResult(0);
             }
         }
 
-        public class MessageHandlerReceiverOne : IHandleMessageAsync<MessageForReceiverOne>
+        public class SecondHandlerReceiverOne : IHandleMessageAsync<MessageForReceiverOne>
         {
             readonly Context context;
 
-            public MessageHandlerReceiverOne(Context context)
+            public SecondHandlerReceiverOne(Context context)
             {
                 this.context = context;
             }
 
             public Task Handle(MessageForReceiverOne message, IBusForHandler bus)
             {
-                context.SyncReceiverOneCalled += 1;
+                context.SecondHandlerReceiverOneCalls += 1;
                 return Task.FromResult(0);
             }
         }
 
-        public class AsyncMessageHandlerReceiverTwo : IHandleMessageAsync<MessageForReceiverTwo>
+        public class FirstHandlerReceiverTwo : IHandleMessageAsync<MessageForReceiverTwo>
         {
             readonly Context context;
 
-            public AsyncMessageHandlerReceiverTwo(Context context)
+            public FirstHandlerReceiverTwo(Context context)
             {
                 this.context = context;
             }
 
             public Task Handle(MessageForReceiverTwo message, IBusForHandler bus)
             {
-                context.AsyncReceiverTwoCalled += 1;
+                context.FirstHandlerReceiverTwoCalls += 1;
                 return Task.FromResult(0);
             }
         }
 
-        public class MessageHandlerReceiverTwo : IHandleMessageAsync<MessageForReceiverTwo>
+        public class SecondHandlerReceiverTwo : IHandleMessageAsync<MessageForReceiverTwo>
         {
             readonly Context context;
 
-            public MessageHandlerReceiverTwo(Context context)
+            public SecondHandlerReceiverTwo(Context context)
             {
                 this.context = context;
             }
 
             public Task Handle(MessageForReceiverTwo message, IBusForHandler bus)
             {
-                context.SyncReceiverTwoCalled += 1;
+                context.SecondHandlerReceiverTwoCalls += 1;
                 return Task.FromResult(0);
             }
         }
 
-        public class AsyncMessageHandlerReceiverThree : IHandleMessageAsync<MessageForReceiverThree>
+        public class FirstHandlerReceiverThree : IHandleMessageAsync<MessageForReceiverThree>
         {
             readonly Context context;
 
-            public AsyncMessageHandlerReceiverThree(Context context)
+            public FirstHandlerReceiverThree(Context context)
             {
                 this.context = context;
             }
 
             public Task Handle(MessageForReceiverThree message, IBusForHandler bus)
             {
-                context.AsyncReceiverThreeCalled += 1;
+                context.FirstHandlerReceiverThreeCalls += 1;
                 return Task.FromResult(0);
             }
         }
 
-        public class MessageHandlerReceiverThree : IHandleMessageAsync<MessageForReceiverThree>
+        public class SecondHandlerReceiverThree : IHandleMessageAsync<MessageForReceiverThree>
         {
             readonly Context context;
 
-            public MessageHandlerReceiverThree(Context context)
+            public SecondHandlerReceiverThree(Context context)
             {
                 this.context = context;
             }
 
             public Task Handle(MessageForReceiverThree message, IBusForHandler bus)
             {
-                context.SyncReceiverThreeCalled += 1;
+                context.SecondHandlerReceiverThreeCalls += 1;
                 return Task.FromResult(0);
             }
         }
@@ -262,12 +262,12 @@
 
         public class Context
         {
-            public int AsyncReceiverOneCalled { get; set; }
-            public int SyncReceiverOneCalled { get; set; }
-            public int AsyncReceiverTwoCalled { get; set; }
-            public int SyncReceiverTwoCalled { get; set; }
-            public int AsyncReceiverThreeCalled { get; set; }
-            public int SyncReceiverThreeCalled { get; set; }
+            public int FirstHandlerReceiverOneCalls { get; set; }
+            public int SecondHandlerReceiverOneCalls { get; set; }
+            public int FirstHandlerReceiverTwoCalls { get; set; }
+            public int SecondHandlerReceiverTwoCalls { get; set; }
+            public int FirstHandlerReceiverThreeCalls { get; set; }
+            public int SecondHandlerReceiverThreeCalls { get; set; }
         }
     }
 }

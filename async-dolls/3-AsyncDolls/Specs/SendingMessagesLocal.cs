@@ -39,19 +39,19 @@
         }
 
         [Test]
-        public async Task WhenOneMessageSentLocal_InvokesSynchronousAndAsynchronousHandlers()
+        public async Task WhenOneMessageSentLocal_InvokesAllHandlers()
         {
             await sender.SendLocal(new Message
             {
                 Bar = 42
             });
 
-            context.FooAsyncHandlerCalled.Should().BeInvokedOnce();
-            context.FooHandlerCalled.Should().BeInvokedOnce();
+            context.FirstHandlerCalls.Should().BeInvokedOnce();
+            context.SecondHandlerCalls.Should().BeInvokedOnce();
         }
 
         [Test]
-        public async Task WhenMultipleMessageSentLocal_InvokesSynchronousAndAsynchronousHandlers()
+        public async Task WhenMultipleMessageSentLocal_InvokesAllHandlersForEachMessage()
         {
             await sender.SendLocal(new Message
             {
@@ -62,8 +62,8 @@
                 Bar = 43
             });
 
-            context.FooAsyncHandlerCalled.Should().BeInvokedTwice();
-            context.FooHandlerCalled.Should().BeInvokedTwice();
+            context.FirstHandlerCalls.Should().BeInvokedTwice();
+            context.SecondHandlerCalls.Should().BeInvokedTwice();
         }
 
         public class HandlerRegistrySimulator : HandlerRegistry
@@ -80,42 +80,42 @@
                 if (messageType == typeof(Message))
                 {
                     return this.ConsumeWith(
-                        new AsyncMessageHandler(context),
-                        new MessageHandler(context));
+                        new FirstHandler(context),
+                        new SecondHandler(context));
                 }
 
                 return this.ConsumeAll();
             }
         }
 
-        public class AsyncMessageHandler : IHandleMessageAsync<Message>
+        public class FirstHandler : IHandleMessageAsync<Message>
         {
             readonly Context context;
 
-            public AsyncMessageHandler(Context context)
+            public FirstHandler(Context context)
             {
                 this.context = context;
             }
 
             public Task Handle(Message message, IBusForHandler bus)
             {
-                context.FooAsyncHandlerCalled += 1;
+                context.FirstHandlerCalls += 1;
                 return Task.FromResult(0);
             }
         }
 
-        public class MessageHandler : IHandleMessageAsync<Message>
+        public class SecondHandler : IHandleMessageAsync<Message>
         {
             readonly Context context;
 
-            public MessageHandler(Context context)
+            public SecondHandler(Context context)
             {
                 this.context = context;
             }
 
             public Task Handle(Message message, IBusForHandler bus)
             {
-                context.FooHandlerCalled += 1;
+                context.SecondHandlerCalls += 1;
                 return Task.FromResult(0);
             }
         }
@@ -127,8 +127,8 @@
 
         public class Context
         {
-            public int FooAsyncHandlerCalled { get; set; }
-            public int FooHandlerCalled { get; set; }
+            public int FirstHandlerCalls { get; set; }
+            public int SecondHandlerCalls { get; set; }
         }
     }
 }

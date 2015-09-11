@@ -42,21 +42,21 @@
         }
 
         [Test]
-        public async Task WhenOneMessageSent_InvokesSynchronousAndAsynchronousHandlers()
+        public async Task WhenOneMessageSent_InvokesAllHandlers()
         {
             await sender.Send(new Message
             {
                 Bar = 42
             });
 
-            context.AsyncHandlerCalls.Should().BeInvokedOnce();
-            context.HandlerCalls.Should().BeInvokedOnce();
+            context.FirstHandlerCalls.Should().BeInvokedOnce();
+            context.SecondHandlerCalls.Should().BeInvokedOnce();
             context.ReplyHandlerCalls.Should().BeInvoked(3);
             context.HeaderValue.Should().Be("Value");
         }
 
         [Test]
-        public async Task WhenMultipeMessageSent_InvokesSynchronousAndAsynchronousHandlers()
+        public async Task WhenMultipeMessageSent_InvokesAllHandlersForEachMessage()
         {
             await sender.Send(new Message
             {
@@ -75,8 +75,8 @@
                 Bar = 45
             });
 
-            context.AsyncHandlerCalls.Should().BeInvoked(4);
-            context.HandlerCalls.Should().BeInvoked(4);
+            context.FirstHandlerCalls.Should().BeInvoked(4);
+            context.SecondHandlerCalls.Should().BeInvoked(4);
             context.ReplyHandlerCalls.Should().BeInvoked(12);
             context.HeaderValue.Should().Be("Value");
         }
@@ -101,8 +101,8 @@
                 if (messageType == typeof(Message))
                 {
                     return this.ConsumeWith(
-                        new AsyncMessageHandler(context),
-                        new MessageHandler(context));
+                        new FirstHandler(context),
+                        new SecondHandler(context));
                 }
 
                 if (messageType == typeof(ReplyMessage))
@@ -135,47 +135,47 @@
             }
         }
 
-        public class AsyncMessageHandler : IHandleMessageAsync<Message>
+        public class FirstHandler : IHandleMessageAsync<Message>
         {
             readonly Context context;
 
-            public AsyncMessageHandler(Context context)
+            public FirstHandler(Context context)
             {
                 this.context = context;
             }
 
             public async Task Handle(Message message, IBusForHandler bus)
             {
-                context.AsyncHandlerCalls += 1;
+                context.FirstHandlerCalls += 1;
                 await bus.Reply(new ReplyMessage
                 {
-                    Answer = "AsyncMessageHandler"
+                    Answer = "FirstHandler"
                 });
 
                 var options = new ReplyOptions();
                 options.Headers.Add("Key", "Value");
                 await bus.Reply(new ReplyMessage
                 {
-                    Answer = "AsyncMessageHandlerWithHeaders"
+                    Answer = "FirstHandlerWithHeaders"
                 }, options);
             }
         }
 
-        public class MessageHandler : IHandleMessageAsync<Message>
+        public class SecondHandler : IHandleMessageAsync<Message>
         {
             readonly Context context;
 
-            public MessageHandler(Context context)
+            public SecondHandler(Context context)
             {
                 this.context = context;
             }
 
             public Task Handle(Message message, IBusForHandler bus)
             {
-                context.HandlerCalls += 1;
+                context.SecondHandlerCalls += 1;
                 return bus.Reply(new ReplyMessage
                 {
-                    Answer = "MessageHandler"
+                    Answer = "SecondHandler"
                 });
             }
         }
@@ -192,8 +192,8 @@
 
         public class Context
         {
-            public int AsyncHandlerCalls { get; set; }
-            public int HandlerCalls { get; set; }
+            public int FirstHandlerCalls { get; set; }
+            public int SecondHandlerCalls { get; set; }
             public int ReplyHandlerCalls { get; set; }
             public string HeaderValue { get; set; }
         }

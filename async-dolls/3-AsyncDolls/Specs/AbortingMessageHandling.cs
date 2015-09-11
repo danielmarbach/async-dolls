@@ -42,7 +42,7 @@ namespace AsyncDolls.Specs
         }
 
         [Test]
-        public async Task WhenPipelineAbortedFirstHandler_ShouldNotContinueToSecondHandler()
+        public async Task WhenPipelineAbortedFirstHandler_OnlyInvokesFirstHandler()
         {
             await sender.Send(new Message
             {
@@ -51,13 +51,13 @@ namespace AsyncDolls.Specs
                 Bar = 42
             });
 
-            context.FirstHandlerCalled.Should().BeInvokedOnce();
-            context.SecondHandlerCalled.Should().NotBeInvoked();
-            context.LastHandlerCalled.Should().NotBeInvoked();
+            context.FirstHandlerCalls.Should().BeInvokedOnce();
+            context.SecondHandlerCalls.Should().NotBeInvoked();
+            context.LastHandlerCalls.Should().NotBeInvoked();
         }
 
         [Test]
-        public async Task WhenPipelineAbortedSecondHandler_ShouldNotContinueToLastHandler()
+        public async Task WhenPipelineAbortedSecondHandler_DoesntInvokeLastHandler()
         {
             await sender.Send(new Message
             {
@@ -66,13 +66,13 @@ namespace AsyncDolls.Specs
                 Bar = 42
             });
 
-            context.FirstHandlerCalled.Should().BeInvokedOnce();
-            context.SecondHandlerCalled.Should().BeInvokedOnce();
-            context.LastHandlerCalled.Should().NotBeInvoked();
+            context.FirstHandlerCalls.Should().BeInvokedOnce();
+            context.SecondHandlerCalls.Should().BeInvokedOnce();
+            context.LastHandlerCalls.Should().NotBeInvoked();
         }
 
         [Test]
-        public async Task WhenPipelineNotAborted_ShouldExecuteAllHandler()
+        public async Task WhenPipelineNotAborted_InvokesAllHandlers()
         {
             await sender.Send(new Message
             {
@@ -81,9 +81,9 @@ namespace AsyncDolls.Specs
                 Bar = 42
             });
 
-            context.FirstHandlerCalled.Should().BeInvokedOnce();
-            context.SecondHandlerCalled.Should().BeInvokedOnce();
-            context.LastHandlerCalled.Should().BeInvokedOnce();
+            context.FirstHandlerCalls.Should().BeInvokedOnce();
+            context.SecondHandlerCalls.Should().BeInvokedOnce();
+            context.LastHandlerCalls.Should().BeInvokedOnce();
         }
 
         public class HandlerRegistrySimulator : HandlerRegistry
@@ -120,7 +120,7 @@ namespace AsyncDolls.Specs
 
             public Task Handle(Message message, IBusForHandler bus)
             {
-                context.FirstHandlerCalled += 1;
+                context.FirstHandlerCalls += 1;
 
                 if (message.AbortFirstHandler)
                 {
@@ -142,7 +142,7 @@ namespace AsyncDolls.Specs
 
             public Task Handle(Message message, IBusForHandler bus)
             {
-                context.SecondHandlerCalled += 1;
+                context.SecondHandlerCalls += 1;
 
                 if (message.AbortSecondHandler)
                 {
@@ -164,7 +164,7 @@ namespace AsyncDolls.Specs
 
             public Task Handle(Message message, IBusForHandler bus)
             {
-                context.LastHandlerCalled += 1;
+                context.LastHandlerCalls += 1;
                 return Task.FromResult(0);
             }
         }
@@ -178,9 +178,9 @@ namespace AsyncDolls.Specs
 
         public class Context
         {
-            public int FirstHandlerCalled { get; set; }
-            public int SecondHandlerCalled { get; set; }
-            public int LastHandlerCalled { get; set; }
+            public int FirstHandlerCalls { get; set; }
+            public int SecondHandlerCalls { get; set; }
+            public int LastHandlerCalls { get; set; }
         }
     }
 }

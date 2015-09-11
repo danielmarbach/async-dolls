@@ -51,8 +51,8 @@
                 Bar = 42
             });
 
-            context.FirstHandlerCalled.Should().BeInvokedOnce();
-            context.SecondHandlerCalled.Should().BeInvokedOnce();
+            context.FirstHandlerCalls.Should().BeInvokedOnce();
+            context.SecondHandlerCalls.Should().BeInvokedOnce();
         }
 
         [Test]
@@ -67,8 +67,8 @@
                 Bar = 43
             });
 
-            context.FirstHandlerCalled.Should().BeInvokedTwice();
-            context.SecondHandlerCalled.Should().BeInvokedTwice();
+            context.FirstHandlerCalls.Should().BeInvokedTwice();
+            context.SecondHandlerCalls.Should().BeInvokedTwice();
         }
 
         [Test]
@@ -124,7 +124,7 @@
 
             public Task Handle(Event message, IBusForHandler bus)
             {
-                context.FirstHandlerCalled += 1;
+                context.FirstHandlerCalls += 1;
                 context.FirstcHandlerCaughtHeaders = bus.Headers(message);
                 return Task.FromResult(0);
             }
@@ -141,7 +141,7 @@
 
             public Task Handle(Event message, IBusForHandler bus)
             {
-                context.SecondHandlerCalled += 1;
+                context.SecondHandlerCalls += 1;
                 context.SecondHandlerCaughtHeaders = bus.Headers(message);
                 return Task.FromResult(0);
             }
@@ -154,8 +154,8 @@
 
         public class Context
         {
-            public int FirstHandlerCalled { get; set; }
-            public int SecondHandlerCalled { get; set; }
+            public int FirstHandlerCalls { get; set; }
+            public int SecondHandlerCalls { get; set; }
             public IDictionary<string, string> FirstcHandlerCaughtHeaders { get; set; }
             public IDictionary<string, string> SecondHandlerCaughtHeaders { get; set; }
         }
