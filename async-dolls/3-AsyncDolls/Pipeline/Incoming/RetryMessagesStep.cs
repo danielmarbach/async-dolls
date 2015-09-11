@@ -11,7 +11,7 @@ namespace AsyncDolls.Pipeline.Incoming
             return InvokeWithDelay(context, next, delay);
         }
 
-        private async Task InvokeWithDelay(IncomingLogicalContext context, Func<Task> next, int delay)
+        private static async Task InvokeWithDelay(IncomingLogicalContext context, Func<Task> next, int delay)
         {
             try
             {

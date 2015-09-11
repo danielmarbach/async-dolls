@@ -74,7 +74,7 @@ namespace AsyncDolls
         {
             if (message == null)
             {
-                throw new ArgumentNullException("message", "You cannot send null");
+                throw new ArgumentNullException(nameof(message), "You cannot send null");
             }
 
             var sendOptions = options ?? new SendOptions();
@@ -87,7 +87,7 @@ namespace AsyncDolls
         {
             if (message == null)
             {
-                throw new ArgumentNullException("message", "You cannot publish null");
+                throw new ArgumentNullException(nameof(message), "You cannot publish null");
             }
 
             var publishOptions = options ?? new PublishOptions();
