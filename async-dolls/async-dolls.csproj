@@ -160,6 +160,7 @@
     <Compile Include="3-AsyncDolls\PublishOptions.cs" />
     <Compile Include="3-AsyncDolls\Queue.cs" />
     <Compile Include="3-AsyncDolls\ReplyOptions.cs" />
+    <Compile Include="3-AsyncDolls\Script.cs" />
     <Compile Include="3-AsyncDolls\SendOnlyBus.cs" />
     <Compile Include="3-AsyncDolls\SendOnlyConfiguration.cs" />
     <Compile Include="3-AsyncDolls\SendOptions.cs" />
