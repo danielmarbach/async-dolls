@@ -52,7 +52,7 @@ Translated to C# this means:
 Addition:
 * NUnit and xunit support `async void` returning unit tests and they implement their own `SynchronizationContext` to capture any exceptions raised in the background. With their custom implemented `SynchronizationContext` they can also intercept the execution of the `async void` method and only mark the test as completed when that method is done.
 
-## ConfigureAwait(false) is your friend
+#### ConfigureAwait(false) is your friend
 > As asynchronous GUI applications grow larger, you might find many small parts of async methods all using the GUI thread as their context. This can cause sluggishness as responsiveness suffers from “thousands of paper cuts.”
 
 > To mitigate this, await the result of `ConfigureAwait` whenever you can.
@@ -64,3 +64,27 @@ Note: `ConfigureAwait(false)` doesn't mean the continuation code will never run 
 > You should not use `ConfigureAwait` when you have code after the await in the method that needs the context. For GUI apps, this includes any code that manipulates GUI elements, writes data-bound properties or depends on a GUI-specific type such as Dispatcher/CoreDispatcher. For ASP.NET apps, this includes any code that uses `HttpContext.Current` or builds an ASP.NET response, including return statements in controller actions
 
 > Each async method has its own context, so if one async method calls another async method, their contexts are independent. [Source](https://msdn.microsoft.com/en-us/magazine/jj991977.aspx)
+
+#### Don't mix blocking and async code
+>“Async all the way” means that
+
+>*  you shouldn’t mix synchronous and asynchronous code without carefully considering the consequences.
+
+> In particular, it’s usually a bad idea to block on async code by calling `Task.Wait` or `Task.Result`. This is an especially common problem for programmers who are “dipping their toes” into asynchronous programming, converting just a small part of their application and wrapping it in a synchronous API so the rest of the application is isolated from the changes. Unfortunately, they run into problems with deadlocks.
+
+> Allowing async to grow through the codebase is the best solution, but this means there’s a lot of initial work for an application to see real benefit from async code. There are a few techniques for incrementally converting a large codebase to async code, but they’re outside the scope of this article. In some cases, using Task.Wait or `Task.Result` can help with a partial conversion, but you need to be aware of the deadlock problem as well as the error-handling problem.
+
+> Every Task will store a list of exceptions. When you await a Task, the first exception is re-thrown, so you can catch the specific exception type (such as `InvalidOperationException`). However, when you synchronously block on a Task using Task.Wait or `Task.Result`, all of the exceptions are wrapped in an `AggregateException` and thrown.
+
+> To summarize this guideline, you should avoid mixing async and blocking code. Mixed async and blocking code can cause deadlocks, more-complex error handling and unexpected blocking of context threads. The exception to this guideline is the Main method for console applications, or—if you’re an advanced user—managing a partially asynchronous codebase.
+
+
+#### Mixing concurrent and asychronous processing
+A few key points from the code:
+
+* Prefer `Task.Run` over `Task.Factory.StartNew`
+* Passing the `CancellationToken` to the task creation means when the token is cancelled the task automatically switches into the cancelled state.
+* For continuous polling tasks provide `TaskCreationOptions.LongRunnin`
+* Check the `CancellationToken` as much as needed. For graceful cancellation use the state query API instead of throwing an `OperationCancelledException`
+* `Task.Factory.StartNew` with async lambda requires an `Unwrap`!
+* Don't `await` a task if you want to concurrently process and asynchronous 
