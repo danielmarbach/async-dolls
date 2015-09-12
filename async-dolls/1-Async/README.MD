@@ -28,4 +28,23 @@ Translated to C# this means:
 * For CPU bound work use `Parallel.For`, `Parallel.ForEach`, `Task.Run` or `Task.StartNew` but prefer `Task.Run` over `Task.StartNew`. If you require to asynchronously wait for the completion you can `await` the returned tasks
 * For IO bound work don't use `Task.Run` or `Task.StartNew` and `await` the asynchronous operation.
 
-*
+#### Async Void
+> There are three possible return types for async methods: `Task`, `Task<T>` and `void`, but the natural return types for async methods are just `Task` and `Task<T>`. When converting from synchronous to asynchronous code, any method returning a type T becomes an async method returning `Task<T>`, and any method returning `void` becomes an async method returning Task.
+
+> Void-returning async methods have a specific purpose: to make asynchronous event handlers possible.
+
+> Async void methods have different error-handling semantics. When an exception is thrown out of an `async Task` or `async Task<T>` method, that exception is captured and placed on the Task object. With `async void` methods, there is no `Task` object, so any exceptions thrown out of an `async void` method will be raised directly on the `SynchronizationContext` that was active when the `async void` method started.
+
+> Async void methods have different composing semantics. Async methods returning Task or Task<T> can be easily composed using await, Task.WhenAny, Task.WhenAll and so on. Async methods returning void don’t provide an easy way to notify the calling code that they’ve completed. It’s easy to start several async void methods, but it’s not easy to determine when they’ve finished. Async void methods will notify their `SynchronizationContext` when they start and finish, but a custom `SynchronizationContext` is a complex solution for regular application code.
+
+> Async void methods are difficult to test. Because of the differences in error handling and composing, it’s difficult to write unit tests that call async void methods. The MSTest asynchronous testing support only works for async methods returning Task or Task<T>. It’s possible to install a SynchronizationContext that detects when all async void methods have completed and collects any exceptions, but it’s much easier to just make the async void methods return Task instead.
+
+> It’s clear that async void methods have several disadvantages compared to async Task methods, but they’re quite useful in one particular case: asynchronous event handlers. The differences in semantics make sense for asynchronous event handlers. They raise their exceptions directly on the SynchronizationContext, which is similar to how synchronous event handlers behave.
+
+> Async void methods can wreak havoc if the caller isn’t expecting them to be async. When the return type is Task, the caller knows it’s dealing with a future operation; when the return type is void, the caller might assume the method is complete by the time it returns. This problem can crop up in many unexpected ways. It’s usually wrong to provide an async implementation (or override) of a void-returning method on an interface (or base class). Some events also assume that their handlers are complete when they return. One subtle trap is passing an async lambda to a method taking an Action parameter; in this case, the async lambda returns void and inherits all the problems of async void methods. As a general rule, async lambdas should only be used if they’re converted to a delegate type that returns Task (for example, Func<Task>).
+
+>To summarize this guideline
+
+> * you should prefer async Task to async void.
+
+>Async Task methods enable easier error-handling, composability and testability. The exception to this guideline is asynchronous event handlers, which must return void. This exception includes methods that are logically event handlers even if they’re not literally event handlers (for example, `ICommand.Execute` implementations). [Source](https://msdn.microsoft.com/en-us/magazine/jj991977.aspx)
