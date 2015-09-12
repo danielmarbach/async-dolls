@@ -41,7 +41,7 @@ Translated to C# this means:
 
 > It’s clear that async void methods have several disadvantages compared to async Task methods, but they’re quite useful in one particular case: asynchronous event handlers. The differences in semantics make sense for asynchronous event handlers. They raise their exceptions directly on the SynchronizationContext, which is similar to how synchronous event handlers behave.
 
-> Async void methods can wreak havoc if the caller isn’t expecting them to be async. When the return type is Task, the caller knows it’s dealing with a future operation; when the return type is void, the caller might assume the method is complete by the time it returns. This problem can crop up in many unexpected ways. It’s usually wrong to provide an async implementation (or override) of a void-returning method on an interface (or base class). Some events also assume that their handlers are complete when they return. One subtle trap is passing an async lambda to a method taking an Action parameter; in this case, the async lambda returns void and inherits all the problems of async void methods. As a general rule, async lambdas should only be used if they’re converted to a delegate type that returns Task (for example, Func<Task>).
+> `Async void` methods can wreak havoc if the caller isn’t expecting them to be async. When the return type is `Task`, the caller knows it’s dealing with a future operation; when the return type is `void`, the caller might assume the method is complete by the time it returns. This problem can crop up in many unexpected ways. It’s usually wrong to provide an `async` implementation (or override) of a void-returning method on an interface (or base class). Some events also assume that their handlers are complete when they return. One subtle trap is passing an async lambda to a method taking an `Action` parameter; in this case, the async lambda returns `void` and inherits all the problems of `async void` methods. As a general rule, async lambdas should only be used if they’re converted to a delegate type that returns Task (for example, `Func<Task>`).
 
 >To summarize this guideline
 
@@ -51,3 +51,16 @@ Translated to C# this means:
 
 Addition:
 * NUnit and xunit support `async void` returning unit tests and they implement their own `SynchronizationContext` to capture any exceptions raised in the background. With their custom implemented `SynchronizationContext` they can also intercept the execution of the `async void` method and only mark the test as completed when that method is done.
+
+## ConfigureAwait(false) is your friend
+> As asynchronous GUI applications grow larger, you might find many small parts of async methods all using the GUI thread as their context. This can cause sluggishness as responsiveness suffers from “thousands of paper cuts.”
+
+> To mitigate this, await the result of `ConfigureAwait` whenever you can.
+
+> By using `ConfigureAwait`, you enable a small amount of parallelism: Some asynchronous code can run in parallel with the GUI thread instead of constantly badgering it with bits of work to do.
+
+Note: `ConfigureAwait(false)` doesn't mean the continuation code will never run on the original context. It might still be running on the original context if the task returned is already completed or completed quickly.
+
+> You should not use `ConfigureAwait` when you have code after the await in the method that needs the context. For GUI apps, this includes any code that manipulates GUI elements, writes data-bound properties or depends on a GUI-specific type such as Dispatcher/CoreDispatcher. For ASP.NET apps, this includes any code that uses `HttpContext.Current` or builds an ASP.NET response, including return statements in controller actions
+
+> Each async method has its own context, so if one async method calls another async method, their contexts are independent. [Source](https://msdn.microsoft.com/en-us/magazine/jj991977.aspx)
