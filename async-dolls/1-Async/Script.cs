@@ -110,7 +110,7 @@ namespace AsyncDolls
         }
 
         [Test]
-        public async Task ACompleteExampleMixingAsynchronousAndParallelProcessing()
+        public async Task ACompleteExampleMixingConcurrentAndAsynchronousProcessingWithPotentialBlockingOperations()
         {
             var runningTasks = new ConcurrentDictionary<Task, Task>();
             var semaphore = new SemaphoreSlim(1);
@@ -132,7 +132,7 @@ namespace AsyncDolls
                             int nr = Interlocked.Increment(ref taskNumber);
 
                             Console.WriteLine("Kick off " + nr + " " + Thread.CurrentThread.ManagedThreadId);
-                            await Task.Delay(1000).ConfigureAwait(false);
+                            await LibraryCallWhichIsNotTrulyAsync();
                             Console.WriteLine(" back " + nr + " " + Thread.CurrentThread.ManagedThreadId);
 
                             semaphore.Release();
@@ -141,11 +141,13 @@ namespace AsyncDolls
 
                         task.ContinueWith(t =>
                         {
-                            Task wayne;
-                            runningTasks.TryRemove(t, out wayne);
-                        }, TaskContinuationOptions.ExecuteSynchronously).Ignore();
+                            Task taskToBeRemoved;
+                            runningTasks.TryRemove(t, out taskToBeRemoved);
+                        }, TaskContinuationOptions.ExecuteSynchronously)
+                        .Ignore();
 
-                        runningTasks.AddOrUpdate(task, task, (k, v) => task).Ignore();
+                        runningTasks.AddOrUpdate(task, task, (k, v) => task)
+                        .Ignore();
                     }
                 }, token, TaskCreationOptions.LongRunning, TaskScheduler.Default)
                 .Unwrap();
@@ -157,6 +159,63 @@ namespace AsyncDolls
             }
 
             await Task.WhenAll(runningTasks.Values);
+        }
+
+        // For example MSMQ has no true async API especially when you are dealing with transactions. Then you need to 
+        // use .Receive which is a blocking operation. 
+        private static Task LibraryCallWhichIsNotTrulyAsync()
+        {
+            Thread.Sleep(1000);
+            return Task.FromResult(0);
+        }
+
+        [Test]
+        public async Task ACompleteExampleMixingConcurrentAndAsynchronousProcessingWithTrueAsyncOperations()
+        {
+            var runningTasks = new ConcurrentDictionary<Task, Task>();
+            var semaphore = new SemaphoreSlim(1);
+            var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            var token = tokenSource.Token;
+
+            try
+            {
+                var pumpTask = Task.Factory.StartNew(async () =>
+                {
+                    int taskNumber = 0;
+                    while (!token.IsCancellationRequested)
+                    {
+                        await semaphore.WaitAsync(token);
+                        int nr = Interlocked.Increment(ref taskNumber);
+
+                        Console.WriteLine("Kick off " + nr + " " + Thread.CurrentThread.ManagedThreadId);
+                        var task = LibraryCallWhichIsTrulyAsync();
+
+                        task.ContinueWith(t =>
+                        {
+                            Console.WriteLine(" back " + nr + " " + Thread.CurrentThread.ManagedThreadId);
+                            semaphore.Release();
+                            Task taskToBeRemoved;
+                            runningTasks.TryRemove(t, out taskToBeRemoved);
+                        })
+                        .Ignore();
+
+                        runningTasks.AddOrUpdate(task, task, (k, v) => task)
+                        .Ignore();
+                    }
+                }, token, TaskCreationOptions.LongRunning, TaskScheduler.Default)
+                .Unwrap();
+
+                await pumpTask;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            await Task.WhenAll(runningTasks.Values);
+        }
+
+        private static Task LibraryCallWhichIsTrulyAsync()
+        {
+            return Task.Delay(1000);
         }
     }
 
