@@ -1,9 +1,9 @@
 # Links
 ## Async / Await
 * [Six Essential Tips for Async](http://channel9.msdn.com/Series/Three-Essential-Tips-for-Async)
-* [Participating in TransactionScopes and Async/Await](http://www.planetgeek.ch/2014/12/07/participating-in-transactionscopes-and-asyncawait-introduction/)
 * [Asynchronous Programming with Async and Await](https://msdn.microsoft.com/en-us/library/hh191443.aspx)
 * [Async/Await - Best Practices in Asynchronous Programming](https://msdn.microsoft.com/en-us/magazine/jj991977.aspx)
+* [Async/Await FAQ](http://blogs.msdn.com/b/pfxteam/archive/2012/04/12/async-await-faq.aspx)
 * [Should I expose synchronous wrappers for asynchronous methods?](http://blogs.msdn.com/b/pfxteam/archive/2012/04/13/10293638.aspx)
 * [Should I expose asynchronous wrappers for synchronous methods?](http://blogs.msdn.com/b/pfxteam/archive/2012/03/24/10287244.aspx)
 * [Await anything](http://blogs.msdn.com/b/pfxteam/archive/2011/01/13/10115642.aspx)
@@ -15,6 +15,7 @@
 ## Transactions
 * [Working with Transactions (EF6 Onwards)](https://msdn.microsoft.com/en-us/data/dn456843.aspx)
 * [Enlisting Resources as Participants in a Transaction](https://msdn.microsoft.com/en-us/library/ms172153.aspx)
+* [Participating in TransactionScopes and Async/Await](http://www.planetgeek.ch/2014/12/07/participating-in-transactionscopes-and-asyncawait-introduction/)
 
 ## JavaScript Russian Doll
 
