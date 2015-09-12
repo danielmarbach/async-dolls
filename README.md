@@ -1,5 +1,7 @@
 # Links
 ## Async / Await
+* [Six Essential Tips for Async](http://channel9.msdn.com/Series/Three-Essential-Tips-for-Async)
+* [Participating in TransactionScopes and Async/Await](http://www.planetgeek.ch/2014/12/07/participating-in-transactionscopes-and-asyncawait-introduction/)
 * [Asynchronous Programming with Async and Await](https://msdn.microsoft.com/en-us/library/hh191443.aspx)
 * [Async/Await - Best Practices in Asynchronous Programming](https://msdn.microsoft.com/en-us/magazine/jj991977.aspx)
 * [Should I expose synchronous wrappers for asynchronous methods?](http://blogs.msdn.com/b/pfxteam/archive/2012/04/13/10293638.aspx)
@@ -9,6 +11,10 @@
 * [`TaskContinuationOptions.AttachToParent` don't work with async](To be announced soon)
 * [Task Parallel Library](https://msdn.microsoft.com/en-us/library/dd460717.aspx)
 * [`Task.Factory.StartNew` vs `Task.Run`](http://blogs.msdn.com/b/pfxteam/archive/2011/10/24/10229468.aspx)
+
+## Transactions
+* [Working with Transactions (EF6 Onwards)](https://msdn.microsoft.com/en-us/data/dn456843.aspx)
+* [Enlisting Resources as Participants in a Transaction](https://msdn.microsoft.com/en-us/library/ms172153.aspx)
 
 ## JavaScript Russian Doll
 
