@@ -113,10 +113,11 @@ namespace AsyncDolls
         public async Task ACompleteExampleMixingConcurrentAndAsynchronousProcessingWithPotentialBlockingOperations()
         {
             var runningTasks = new ConcurrentDictionary<Task, Task>();
-            var semaphore = new SemaphoreSlim(1);
+            var semaphore = new SemaphoreSlim(100);
             var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
             var token = tokenSource.Token;
-            var scheduler = new QueuedTaskScheduler(TaskScheduler.Default, 2);
+            // var scheduler = new QueuedTaskScheduler(TaskScheduler.Default, 2);
+            var scheduler = TaskScheduler.Default;
 
             try
             {
@@ -173,7 +174,7 @@ namespace AsyncDolls
         public async Task ACompleteExampleMixingConcurrentAndAsynchronousProcessingWithTrueAsyncOperations()
         {
             var runningTasks = new ConcurrentDictionary<Task, Task>();
-            var semaphore = new SemaphoreSlim(1);
+            var semaphore = new SemaphoreSlim(100);
             var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
             var token = tokenSource.Token;
 
@@ -196,7 +197,7 @@ namespace AsyncDolls
                             semaphore.Release();
                             Task taskToBeRemoved;
                             runningTasks.TryRemove(t, out taskToBeRemoved);
-                        })
+                        }, TaskContinuationOptions.ExecuteSynchronously)
                         .Ignore();
 
                         runningTasks.AddOrUpdate(task, task, (k, v) => task)
