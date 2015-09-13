@@ -93,6 +93,33 @@ namespace AsyncDolls
             await Invoke(actions);
         }
 
+        static Task MethodAsync1(Func<Task> next)
+        {
+            Console.WriteLine("Method1");
+            return next();
+        }
+
+        static Task MethodAsync2(Func<Task> next)
+        {
+            Console.WriteLine("Method2");
+            return next();
+        }
+
+        static Task MethodAsync3(Func<Task> next)
+        {
+            Console.WriteLine("Method3");
+            return next();
+        }
+
+        static Task Invoke(Queue<Func<Func<Task>, Task>> actions)
+        {
+            if (actions.Count == 0)
+                return Task.FromResult(0);
+
+            var action = actions.Dequeue();
+            return action(() => Invoke(actions));
+        }
+
         [Test]
         public async Task WhatThisAllowsUsTodo()
         {
@@ -119,37 +146,10 @@ namespace AsyncDolls
             await Invoke(actions);
         }
 
-        static Task MethodAsync1(Func<Task> next)
-        {
-            Console.WriteLine("Method1");
-            return next();
-        }
-
-        static Task MethodAsync2(Func<Task> next)
-        {
-            Console.WriteLine("Method2");
-            return next();
-        }
-
-        static Task MethodAsync3(Func<Task> next)
-        {
-            Console.WriteLine("Method3");
-            return next();
-        }
-
         static Task EvilMethod(Func<Task> next)
         {
             Console.WriteLine("Entering EvilMethod");
             throw new InvalidOperationException();
-        }
-
-        static Task Invoke(Queue<Func<Func<Task>, Task>> actions)
-        {
-            if (actions.Count == 0)
-                return Task.FromResult(0);
-
-            var action = actions.Dequeue();
-            return action(() => Invoke(actions));
         }
 
         [Test]
