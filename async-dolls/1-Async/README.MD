@@ -79,7 +79,7 @@ Note: `ConfigureAwait(false)` doesn't mean the continuation code will never run 
 > To summarize this guideline, you should avoid mixing async and blocking code. Mixed async and blocking code can cause deadlocks, more-complex error handling and unexpected blocking of context threads. The exception to this guideline is the Main method for console applications, or—if you’re an advanced user—managing a partially asynchronous codebase.
 
 
-#### Mixing concurrent and asychronous processing
+#### Mixing concurrent and asychronous processing with potential blocking operations
 A few key points from the code:
 
 * Prefer `Task.Run` over `Task.Factory.StartNew`
@@ -87,4 +87,11 @@ A few key points from the code:
 * For continuous polling tasks provide `TaskCreationOptions.LongRunnin`
 * Check the `CancellationToken` as much as needed. For graceful cancellation use the state query API instead of throwing an `OperationCancelledException`
 * `Task.Factory.StartNew` with async lambda requires an `Unwrap`!
-* Don't `await` a task if you want to concurrently process and asynchronous 
+* Don't `await` a task if you want to concurrently process
+* You only need `Task.Run` if the API called is not truly async
+* If you are using a custom scheduler and you are invoking user code then use `TaskCreationOptions.HideScheduler`
+* For throttling `SemaphoreSlim` is quite handy
+* `TaskContinuationOptions.ExecuteSynchronously` usually means the continuation is executed on the thread which handled the antecedent task before the antecedent task moves into the completed state. But this is not always true. When the thread handling the antecedent task was aborted then the continuation might still be executed on any background thread.
+
+#### Mixing concurrent and asynchronous processing with true async operations
+* If the API you are calling is truly async, then don't use `Task.Run` or `Task.Factory.StartNew`, this allows much more efficient resource usage
