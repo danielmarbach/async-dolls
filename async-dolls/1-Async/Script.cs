@@ -133,7 +133,7 @@ namespace AsyncDolls
                             int nr = Interlocked.Increment(ref taskNumber);
 
                             Console.WriteLine("Kick off " + nr + " " + Thread.CurrentThread.ManagedThreadId);
-                            await LibraryCallWhichIsNotTrulyAsync();
+                            await LibraryCallWhichIsNotTrulyAsync().ConfigureAwait(false);
                             Console.WriteLine(" back " + nr + " " + Thread.CurrentThread.ManagedThreadId);
 
                             semaphore.Release();
