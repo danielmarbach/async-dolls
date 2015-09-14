@@ -1,4 +1,7 @@
 using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -17,10 +20,12 @@ namespace AsyncDolls
         public void SetUp()
         {
             Transaction.Current = null;
+
+            foreach (string file in Directory.GetFiles(@".\", "*.received.txt"))
+            {
+                File.Delete(file);
+            }
         }
-
-
-
 
         [Test]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
@@ -162,53 +167,6 @@ namespace AsyncDolls
             }
 
             database.Close();
-        }
-
-
-
-
-        [Test]
-        public async Task WhatDidWeJustLearn()
-        {
-            var slide = new Slide(title: "What did we just learn?");
-            await slide
-                .BulletPoint("Async void is evil! Use carefully.")
-                .BulletPoint("Async all the way.")
-                .BulletPoint("In a cloud first and async world try to avoid TransactionScope")
-                .BulletPoint("Modern frameworks like EF6 (and higher) support own transactions")
-                .BulletPoint("Use AsyncPump if you need TxScope and enlist your own stuff.")
-                .BulletPoint("Write an async enabled library? ConfigureAwait(false) is your friend");
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-        [Test]
-        public async Task Links()
-        {
-            var slide = new Slide(title: "Useful links");
-            await slide
-                .BulletPoint("Sample Code including Transcript of what I explained" +
-                             "https://github.com/danielmarbach/AsyncTransactions")
-                .BulletPoint("Six Essential Tips for Async - " +
-                             "http://channel9.msdn.com/Series/Three-Essential-Tips-for-Async")
-                .BulletPoint("Best Practices in Asynchronous Programming" +
-                             "https://msdn.microsoft.com/en-us/magazine/jj991977.aspx")
-                .BulletPoint("Participating in TransactionScopes and Async/Await" +
-                             "http://www.planetgeek.ch/2014/12/07/participating-in-transactionscopes-and-asyncawait-introduction/")
-                .BulletPoint("Working with Transactions (EF6 Onwards)" +
-                             "https://msdn.microsoft.com/en-us/data/dn456843.aspx")
-                .BulletPoint("Enlisting Resources as Participants in a Transaction" +
-                             "https://msdn.microsoft.com/en-us/library/ms172153.aspx");
         }
 
         private static void StoringTenSwissGuysInTheDatabase(Database database)
