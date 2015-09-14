@@ -104,9 +104,9 @@ namespace AsyncDolls
             DelayAsync(milliseconds).Wait(); // Similar evilness is Thread.Sleep, Semaphore.Wait..
         }
 
-        static Task DelayAsync(int milliseconds)
+        static async Task DelayAsync(int milliseconds)
         {
-            return Task.Delay(milliseconds);
+            await Task.Delay(milliseconds);
         }
 
         [Test]
