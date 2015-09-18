@@ -218,6 +218,71 @@ namespace AsyncDolls
         {
             return Task.Delay(1000);
         }
+
+        static ThreadLocal<int> ThreadLocal = new ThreadLocal<int>(() => 0);
+
+        static AsyncLocal<int> AsyncLocal = new AsyncLocal<int>();
+
+        static dynamic Local;
+
+        [Test]
+        public async Task AsyncLocalForTheWin()
+        {
+            Local = AsyncLocal;
+
+            Console.WriteLine($"Before TopOne: '{Local.Value}'");
+            await TopOne().ConfigureAwait(false);
+            Console.WriteLine($"After TopOne: '{Local.Value}'");
+            await TopTen().ConfigureAwait(false);
+            Console.WriteLine($"After TopTen: '{Local.Value}'");
+        }
+
+        [Test]
+        public async Task ThreadLocalNey()
+        {
+            Local = ThreadLocal;
+
+            Console.WriteLine($"Before TopOne: '{Local.Value}'");
+            await TopOne().ConfigureAwait(false);
+            Console.WriteLine($"After TopOne: '{Local.Value}'");
+            await TopTen().ConfigureAwait(false);
+            Console.WriteLine($"After TopTen: '{Local.Value}'");
+        }
+
+        static async Task TopOne()
+        {
+            await Task.Delay(10).ConfigureAwait(false);
+            Local.Value = 1;
+            await SomewhereElse().ConfigureAwait(false);
+        }
+
+        static async Task TopTen()
+        {
+            await Task.Delay(10).ConfigureAwait(false);
+            Local.Value = 10;
+            await SomewhereElse().ConfigureAwait(false);
+        }
+
+        static async Task SomewhereElse()
+        {
+            await Task.Delay(10).ConfigureAwait(false);
+            Console.WriteLine($"Inside Somewhere: '{Local.Value}'");
+            await Task.Delay(10).ConfigureAwait(false);
+            await DeepDown();
+        }
+
+        static async Task DeepDown()
+        {
+            await Task.Delay(10).ConfigureAwait(false);
+            Console.WriteLine($"Inside DeepDown: '{Local.Value}'");
+            Fire().Ignore();
+        }
+
+        static async Task Fire()
+        {
+            await Task.Yield();
+            Console.WriteLine($"Inside Fire: '{Local.Value}'");
+        }
     }
 
     static class TaskExtensions
