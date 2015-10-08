@@ -2,12 +2,10 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Transactions;
 using System.Windows.Threading;
 using NUnit.Framework;
 
@@ -282,6 +280,57 @@ namespace AsyncDolls
         {
             await Task.Yield();
             Console.WriteLine($"Inside Fire: '{Local.Value}'");
+        }
+
+        [Test]
+        public async Task AsyncRecursionWithExceptionHandling()
+        {
+            var sender = new Sender();
+            await sender.RetryOnThrottle(s => s.SendAsync(), TimeSpan.FromMilliseconds(10), 1);
+        }
+    }
+
+    public interface IMessageSender
+    {
+        Task SendAsync();
+    }
+
+    internal class Sender : IMessageSender
+    {
+        private int numberOfTimes = 0;
+
+        public async Task SendAsync()
+        {
+            if (numberOfTimes++ <= 3)
+            {
+                await Task.Delay(1000);
+                throw new InvalidOperationException();
+            }
+        }
+    }
+
+    static class MessageSenderExtensions
+    {
+        public static Task RetryOnThrottle(this IMessageSender sender, Func<IMessageSender, Task> action, TimeSpan delay, int maxRetryAttempts, int retryAttempts = 0)
+        {
+            var task = action(sender);
+
+            return task.ContinueWith(async t =>
+            {
+                var exception = ExceptionDispatchInfo.Capture(t.Exception?.InnerException);
+                var serverBusy = exception.SourceException is InvalidOperationException;
+
+                if (serverBusy && retryAttempts < maxRetryAttempts)
+                {
+                    await Task.Delay(delay);
+                    await sender.RetryOnThrottle(action, delay, maxRetryAttempts, ++retryAttempts);
+                }
+                else if(t.IsFaulted)
+                {
+                    exception.Throw();
+                }
+            })
+            .Unwrap();
         }
     }
 
