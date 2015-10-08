@@ -182,6 +182,16 @@
     <Compile Include="3-AsyncDolls\Testing\MessageUnit.cs" />
     <Compile Include="3-AsyncDolls\Topic.cs" />
     <Compile Include="3-AsyncDolls\TransportMessage.cs" />
+    <Compile Include="4-AsyncDollsSimple\AsyncCountdownEvent.cs" />
+    <Compile Include="4-AsyncDollsSimple\DequeueStrategy.cs" />
+    <Compile Include="4-AsyncDollsSimple\HeaderKeys.cs" />
+    <Compile Include="4-AsyncDollsSimple\IDequeueStrategy.cs" />
+    <Compile Include="4-AsyncDollsSimple\IIncomingStep.cs" />
+    <Compile Include="4-AsyncDollsSimple\IncomingPipeline.cs" />
+    <Compile Include="4-AsyncDollsSimple\IncomingPipelineFactory.cs" />
+    <Compile Include="4-AsyncDollsSimple\SimpleSpec.cs" />
+    <Compile Include="4-AsyncDollsSimple\TaskCompletionSource.cs" />
+    <Compile Include="4-AsyncDollsSimple\TransportMessage.cs" />
     <Compile Include="Infrastructure\DanielMarbach.cs" />
     <Compile Include="Infrastructure\GiveAway.cs" />
     <Compile Include="Infrastructure\Slide.cs" />
