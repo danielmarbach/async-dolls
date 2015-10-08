@@ -140,14 +140,14 @@ namespace AsyncDolls
                         }, CancellationToken.None, TaskCreationOptions.HideScheduler, scheduler)
                         .Unwrap();
 
+                        runningTasks.AddOrUpdate(task, task, (k, v) => task)
+                        .Ignore();
+
                         task.ContinueWith(t =>
                         {
                             Task taskToBeRemoved;
                             runningTasks.TryRemove(t, out taskToBeRemoved);
                         }, TaskContinuationOptions.ExecuteSynchronously)
-                        .Ignore();
-
-                        runningTasks.AddOrUpdate(task, task, (k, v) => task)
                         .Ignore();
                     }
                 }, token, TaskCreationOptions.LongRunning, TaskScheduler.Default)
@@ -191,6 +191,9 @@ namespace AsyncDolls
                         Console.WriteLine("Kick off " + nr + " " + Thread.CurrentThread.ManagedThreadId);
                         var task = LibraryCallWhichIsTrulyAsync();
 
+                        runningTasks.AddOrUpdate(task, task, (k, v) => task)
+                        .Ignore();
+
                         task.ContinueWith(t =>
                         {
                             Console.WriteLine(" back " + nr + " " + Thread.CurrentThread.ManagedThreadId);
@@ -198,9 +201,6 @@ namespace AsyncDolls
                             Task taskToBeRemoved;
                             runningTasks.TryRemove(t, out taskToBeRemoved);
                         }, TaskContinuationOptions.ExecuteSynchronously)
-                        .Ignore();
-
-                        runningTasks.AddOrUpdate(task, task, (k, v) => task)
                         .Ignore();
                     }
                 }, token, TaskCreationOptions.LongRunning, TaskScheduler.Default)
