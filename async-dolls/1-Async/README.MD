@@ -3,7 +3,7 @@
 My name is Daniel Marbach. I'm the CEO of tracelight GmbH in Switzerland and also working as a Solutions Architect for Particular Software, the folks behind NServiceBus.
 
 #### Async Recap
-Parralelism and Asynchronism are the same things, in fact they got often confused. Consider for example how NServiceBus allows you to control message throughput is by setting the `MaximumConcurrencyLevel` option.
+Parralelism and Asynchronism aren't the same things, in fact they got often confused. Consider for example how NServiceBus allows you to control message throughput is by setting the `MaximumConcurrencyLevel` option.
 
 The `MaximumConcurrencyLevel` limits the maximum number of message consuming threads that NServiceBus will allocate. Let us assume we set the `MaximumConcurrencyLevel`m to eight. In this case, NServiceBus will use a maximum of eight message consuming threads from the thread pool.
 
