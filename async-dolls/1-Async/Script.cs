@@ -217,9 +217,9 @@ namespace AsyncDolls
             return Task.Delay(1000);
         }
 
-        static ThreadLocal<int> ThreadLocal = new ThreadLocal<int>(() => 0);
+        static ThreadLocal<string> ThreadLocal = new ThreadLocal<string>(() => "Initial Value");
 
-        static AsyncLocal<int> AsyncLocal = new AsyncLocal<int>();
+        static AsyncLocal<string> AsyncLocal = new AsyncLocal<string> { Value = "Initial Value" };
 
         static dynamic Local;
 
@@ -250,14 +250,14 @@ namespace AsyncDolls
         static async Task TopOne()
         {
             await Task.Delay(10).ConfigureAwait(false);
-            Local.Value = 1;
+            Local.Value = "ValueSetBy TopOne";
             await SomewhereElse().ConfigureAwait(false);
         }
 
         static async Task TopTen()
         {
             await Task.Delay(10).ConfigureAwait(false);
-            Local.Value = 10;
+            Local.Value = "ValueSetBy TopTen";
             await SomewhereElse().ConfigureAwait(false);
         }
 
