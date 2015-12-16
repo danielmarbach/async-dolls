@@ -66,7 +66,7 @@ namespace AsyncDolls
             Func<Task> done = () =>
             {
                 Console.WriteLine("Done");
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             };
 
             await MethodAsync1(() => MethodAsync2(() => MethodAsync3(done)));
@@ -78,7 +78,7 @@ namespace AsyncDolls
             Func<Task> done = () =>
             {
                 Console.WriteLine("Done");
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             };
 
             var actions = new Queue<Func<Func<Task>, Task>>();
@@ -114,7 +114,7 @@ namespace AsyncDolls
         static Task Invoke(Queue<Func<Func<Task>, Task>> actions)
         {
             if (actions.Count == 0)
-                return Task.FromResult(0);
+                return Task.CompletedTask;
 
             var action = actions.Dequeue();
             return action(() => Invoke(actions));
@@ -188,7 +188,7 @@ namespace AsyncDolls
         static Task Invoke(Context context, Queue<Func<Context, Func<Task>, Task>> actions)
         {
             if (actions.Count == 0)
-                return Task.FromResult(0);
+                return Task.CompletedTask;
 
             var action = actions.Dequeue();
             return action(context, () => Invoke(context, actions));
@@ -250,7 +250,7 @@ namespace AsyncDolls
             public Task Invoke(Context context)
             {
                 if (executingActions.Count == 0)
-                    return Task.FromResult(0);
+                    return Task.CompletedTask;
 
                 var action = executingActions.Dequeue();
                 return action(context, () => Invoke(context));

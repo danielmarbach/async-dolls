@@ -6,12 +6,12 @@ namespace AsyncDolls.Pipeline.Outgoing
     {
         public Task PublishAsync(TransportMessage message, PublishOptions options)
         {
-            return Task.FromResult(0);
+            return Task.CompletedTask;
         }
 
         public Task CloseAsync()
         {
-            return Task.FromResult(0);
+            return Task.CompletedTask;
         }
     }
 }

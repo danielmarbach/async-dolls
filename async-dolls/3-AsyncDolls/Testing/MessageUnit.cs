@@ -133,7 +133,7 @@ namespace AsyncDolls.Testing
 
             public Task WarmupAsync()
             {
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
 
             public OutgoingPipeline Create()
@@ -156,7 +156,7 @@ namespace AsyncDolls.Testing
 
             public Task CooldownAsync()
             {
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
 
@@ -175,7 +175,7 @@ namespace AsyncDolls.Testing
 
             public Task WarmupAsync()
             {
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
 
             public IncomingPipeline Create()
@@ -198,7 +198,7 @@ namespace AsyncDolls.Testing
 
             public Task CooldownAsync()
             {
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
 
@@ -250,7 +250,7 @@ namespace AsyncDolls.Testing
             {
                 this.onMessage = onMessage;
 
-                return Task.FromResult(new AsyncClosable(() => Task.FromResult(0)));
+                return Task.FromResult(new AsyncClosable(() => Task.CompletedTask));
             }
 
             public Task HandOver(TransportMessage message)
@@ -304,7 +304,7 @@ namespace AsyncDolls.Testing
             public Task DeadLetterAsync(TransportMessage message)
             {
                 collector.Add(message);
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
     }

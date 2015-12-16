@@ -18,7 +18,7 @@ namespace AsyncDolls.Pipeline.Outgoing
             sender = new MessageSender();
             publisher = new MessagePublisher();
 
-            return Task.FromResult(0);
+            return Task.CompletedTask;
         }
 
         public OutgoingPipeline Create()

@@ -6,7 +6,7 @@ namespace AsyncDolls.Pipeline.Incoming
     {
         public Task WarmupAsync()
         {
-            return Task.FromResult(0);
+            return Task.CompletedTask;
         }
 
         public IncomingPipeline Create()
@@ -16,7 +16,7 @@ namespace AsyncDolls.Pipeline.Incoming
 
         public Task CooldownAsync()
         {
-            return Task.FromResult(0);
+            return Task.CompletedTask;
         }
     }
 }

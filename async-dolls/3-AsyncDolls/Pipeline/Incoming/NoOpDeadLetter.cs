@@ -6,7 +6,7 @@ namespace AsyncDolls.Pipeline.Incoming
     {
         public Task DeadLetterAsync(TransportMessage message)
         {
-            return Task.FromResult(0);
+            return Task.CompletedTask;
         }
     }
 }

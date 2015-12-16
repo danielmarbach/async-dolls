@@ -101,7 +101,7 @@ namespace AsyncDolls.Pipeline.Incoming
         {
             if (executingLogicalPipeline.Count == 0)
             {
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
 
             IIncomingLogicalStep step = executingLogicalPipeline.Dequeue();
@@ -113,7 +113,7 @@ namespace AsyncDolls.Pipeline.Incoming
         {
             if (executingTransportPipeline.Count == 0)
             {
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
 
             IIncomingTransportStep step = executingTransportPipeline.Dequeue();

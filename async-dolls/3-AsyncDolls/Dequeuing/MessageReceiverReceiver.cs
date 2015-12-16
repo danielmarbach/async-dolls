@@ -12,7 +12,7 @@ namespace AsyncDolls.Dequeuing
             EndpointConfiguration.ReadOnly configuration,
             Func<TransportMessage, Task> onMessage)
         {
-            return Task.FromResult(new AsyncClosable(() => Task.FromResult(0)));
+            return Task.FromResult(new AsyncClosable(() => Task.CompletedTask));
         }
     }
 }

@@ -127,7 +127,7 @@ namespace AsyncDolls.Specs
                     bus.DoNotContinueDispatchingCurrentMessageToHandlers();
                 }
 
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
 
@@ -149,7 +149,7 @@ namespace AsyncDolls.Specs
                     bus.DoNotContinueDispatchingCurrentMessageToHandlers();
                 }
 
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
 
@@ -165,7 +165,7 @@ namespace AsyncDolls.Specs
             public Task Handle(Message message, IBusForHandler bus)
             {
                 context.LastHandlerCalls += 1;
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
 

@@ -161,7 +161,7 @@
             public Task Handle(MessageForReceiverOne message, IBusForHandler bus)
             {
                 context.FirstHandlerReceiverOneCalls += 1;
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
 
@@ -177,7 +177,7 @@
             public Task Handle(MessageForReceiverOne message, IBusForHandler bus)
             {
                 context.SecondHandlerReceiverOneCalls += 1;
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
 
@@ -193,7 +193,7 @@
             public Task Handle(MessageForReceiverTwo message, IBusForHandler bus)
             {
                 context.FirstHandlerReceiverTwoCalls += 1;
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
 
@@ -209,7 +209,7 @@
             public Task Handle(MessageForReceiverTwo message, IBusForHandler bus)
             {
                 context.SecondHandlerReceiverTwoCalls += 1;
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
 
@@ -225,7 +225,7 @@
             public Task Handle(MessageForReceiverThree message, IBusForHandler bus)
             {
                 context.FirstHandlerReceiverThreeCalls += 1;
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
 
@@ -241,7 +241,7 @@
             public Task Handle(MessageForReceiverThree message, IBusForHandler bus)
             {
                 context.SecondHandlerReceiverThreeCalls += 1;
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
 

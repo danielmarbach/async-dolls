@@ -126,7 +126,7 @@
             {
                 context.FirstHandlerCalls += 1;
                 context.FirstcHandlerCaughtHeaders = bus.Headers(message);
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
 
@@ -143,7 +143,7 @@
             {
                 context.SecondHandlerCalls += 1;
                 context.SecondHandlerCaughtHeaders = bus.Headers(message);
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
 

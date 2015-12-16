@@ -124,7 +124,7 @@ namespace AsyncDolls.Specs
             {
                 context.FirstHandlerCalls += 1;
                 context.FirstHandlerCaughtHeaders = bus.Headers(message);
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
 
@@ -141,7 +141,7 @@ namespace AsyncDolls.Specs
             {
                 context.SecondHandlerCalls += 1;
                 context.SecondHandlerCaughtHeaders = bus.Headers(message);
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
 

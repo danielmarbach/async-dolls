@@ -131,7 +131,7 @@
                     context.HeaderValue = bus.Headers(message)["Key"];
                 }
 
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
 

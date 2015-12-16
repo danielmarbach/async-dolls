@@ -7,12 +7,12 @@ namespace AsyncDolls.Dequeuing
     {
         public Task StartAsync(EndpointConfiguration.ReadOnly configuration, Func<TransportMessage, Task> onMessage)
         {
-            return Task.FromResult(0);
+            return Task.CompletedTask;
         }
 
         public Task StopAsync()
         {
-            return Task.FromResult(0);
+            return Task.CompletedTask;
         }
     }
 }

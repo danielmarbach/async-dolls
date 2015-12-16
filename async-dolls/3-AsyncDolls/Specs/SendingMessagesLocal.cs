@@ -100,7 +100,7 @@
             public Task Handle(Message message, IBusForHandler bus)
             {
                 context.FirstHandlerCalls += 1;
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
 
@@ -116,7 +116,7 @@
             public Task Handle(Message message, IBusForHandler bus)
             {
                 context.SecondHandlerCalls += 1;
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
 

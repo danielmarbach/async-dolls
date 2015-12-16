@@ -164,7 +164,7 @@ namespace AsyncDolls
         private static Task LibraryCallWhichIsNotTrulyAsync()
         {
             Thread.Sleep(1000);
-            return Task.FromResult(0);
+            return Task.CompletedTask;
         }
 
         [Test]
