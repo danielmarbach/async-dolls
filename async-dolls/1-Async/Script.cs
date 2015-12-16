@@ -138,8 +138,7 @@ namespace AsyncDolls
                         }, CancellationToken.None, TaskCreationOptions.HideScheduler, scheduler)
                         .Unwrap();
 
-                        runningTasks.AddOrUpdate(task, task, (k, v) => task)
-                        .Ignore();
+                        runningTasks.TryAdd(task, task);
 
                         task.ContinueWith(t =>
                         {
@@ -148,7 +147,7 @@ namespace AsyncDolls
                         }, TaskContinuationOptions.ExecuteSynchronously)
                         .Ignore();
                     }
-                }, token, TaskCreationOptions.LongRunning, TaskScheduler.Default)
+                }, token) // TaskCreationOptions.LongRunning is useless with async/await
                 .Unwrap();
 
                 await pumpTask;
@@ -189,8 +188,7 @@ namespace AsyncDolls
                         Console.WriteLine("Kick off " + nr + " " + Thread.CurrentThread.ManagedThreadId);
                         var task = LibraryCallWhichIsTrulyAsync();
 
-                        runningTasks.AddOrUpdate(task, task, (k, v) => task)
-                        .Ignore();
+                        runningTasks.TryAdd(task, task);
 
                         task.ContinueWith(t =>
                         {
@@ -201,7 +199,7 @@ namespace AsyncDolls
                         }, TaskContinuationOptions.ExecuteSynchronously)
                         .Ignore();
                     }
-                }, token, TaskCreationOptions.LongRunning, TaskScheduler.Default)
+                }, token) // TaskCreationOptions.LongRunning is useless with async/await
                 .Unwrap();
 
                 await pumpTask;
