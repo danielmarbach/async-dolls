@@ -15,10 +15,7 @@ namespace AsyncDolls.Pipeline.Incoming
         {
             try
             {
-                using (context.CreateSnapshot())
-                {
-                    await next().ConfigureAwait(false);
-                }
+                await next().ConfigureAwait(false);
             }
             catch (Exception)
             {

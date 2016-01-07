@@ -20,23 +20,20 @@ namespace AsyncDolls.Pipeline.Incoming
 
             foreach (var handler in handlers)
             {
-                using (context.CreateSnapshot())
+                var messageHandler = new MessageHandler
                 {
-                    var messageHandler = new MessageHandler
-                    {
-                        Instance = handler,
-                        Invocation = (handlerInstance, message) => registry.InvokeHandle(handlerInstance, message, bus)
-                    };
+                    Instance = handler,
+                    Invocation = (handlerInstance, message) => registry.InvokeHandle(handlerInstance, message, bus)
+                };
 
-                    context.Handler = messageHandler;
+                context.Handler = messageHandler;
 
-                    await next()
-                        .ConfigureAwait(false);
+                await next()
+                    .ConfigureAwait(false);
 
-                    if (context.HandlerInvocationAbortPending)
-                    {
-                        break;
-                    }
+                if (context.HandlerInvocationAbortPending)
+                {
+                    break;
                 }
             }
         }

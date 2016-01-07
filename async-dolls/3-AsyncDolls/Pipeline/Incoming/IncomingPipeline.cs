@@ -4,23 +4,16 @@ using System.Threading.Tasks;
 
 namespace AsyncDolls.Pipeline.Incoming
 {
-    public class IncomingPipeline : IIncomingTransportStepRegisterer, IIncomingLogicalStepRegisterer, ISupportSnapshots
+    public class IncomingPipeline : IIncomingTransportStepRegisterer, IIncomingLogicalStepRegisterer
     {
-        readonly Queue<IIncomingLogicalStep> registeredLogicalPipeline;
-        readonly Queue<IIncomingTransportStep> registeredTransportPipeline;
-        readonly Stack<Queue<IIncomingLogicalStep>> snapshotLogical;
-        readonly Stack<Queue<IIncomingTransportStep>> snapshotTransport;
+        readonly List<IIncomingLogicalStep> registeredLogicalPipeline;
+        readonly List<IIncomingTransportStep> registeredTransportPipeline;
         IncomingLogicalContext currentContext;
-        Queue<IIncomingLogicalStep> executingLogicalPipeline;
-        Queue<IIncomingTransportStep> executingTransportPipeline;
 
         public IncomingPipeline()
         {
-            snapshotTransport = new Stack<Queue<IIncomingTransportStep>>();
-            snapshotLogical = new Stack<Queue<IIncomingLogicalStep>>();
-
-            registeredLogicalPipeline = new Queue<IIncomingLogicalStep>();
-            registeredTransportPipeline = new Queue<IIncomingTransportStep>();
+            registeredLogicalPipeline = new List<IIncomingLogicalStep>();
+            registeredTransportPipeline = new List<IIncomingTransportStep>();
         }
 
         public IIncomingTransportStepRegisterer Transport
@@ -35,58 +28,42 @@ namespace AsyncDolls.Pipeline.Incoming
 
         IIncomingLogicalStepRegisterer IIncomingLogicalStepRegisterer.Register(IIncomingLogicalStep step)
         {
-            registeredLogicalPipeline.Enqueue(step);
+            registeredLogicalPipeline.Add(step);
 
             return this;
         }
 
         IIncomingLogicalStepRegisterer IIncomingLogicalStepRegisterer.Register(Func<IIncomingLogicalStep> stepFactory)
         {
-            registeredLogicalPipeline.Enqueue(new LazyLogicalStep(stepFactory));
+            registeredLogicalPipeline.Add(new LazyLogicalStep(stepFactory));
 
             return this;
         }
 
         IIncomingTransportStepRegisterer IIncomingTransportStepRegisterer.Register(IIncomingTransportStep step)
         {
-            registeredTransportPipeline.Enqueue(step);
+            registeredTransportPipeline.Add(step);
 
             return this;
         }
 
         IIncomingTransportStepRegisterer IIncomingTransportStepRegisterer.Register(Func<IIncomingTransportStep> stepFactory)
         {
-            registeredTransportPipeline.Enqueue(new LazyTransportStep(stepFactory));
+            registeredTransportPipeline.Add(new LazyTransportStep(stepFactory));
 
             return this;
         }
 
-        public void TakeSnapshot()
-        {
-            snapshotLogical.Push(new Queue<IIncomingLogicalStep>(executingLogicalPipeline));
-            snapshotTransport.Push(new Queue<IIncomingTransportStep>(executingTransportPipeline));
-        }
-
-        public void DeleteSnapshot()
-        {
-            executingLogicalPipeline = snapshotLogical.Pop();
-            executingTransportPipeline = snapshotTransport.Pop();
-        }
-
         public async Task Invoke(IBusForHandler bus, TransportMessage message, EndpointConfiguration.ReadOnly configuration)
         {
-            executingTransportPipeline = new Queue<IIncomingTransportStep>(registeredTransportPipeline);
             var transportContext = new IncomingTransportContext(message, configuration);
-            transportContext.SetChain(this);
             await InvokeTransport(transportContext, bus)
                 .ConfigureAwait(false);
 
             // We assume that someone in the pipeline made logical message
             var logicalMessage = transportContext.Get<LogicalMessage>();
 
-            executingLogicalPipeline = new Queue<IIncomingLogicalStep>(registeredLogicalPipeline);
             var logicalContext = new IncomingLogicalContext(logicalMessage, message, configuration);
-            logicalContext.SetChain(this);
             currentContext = logicalContext;
             await InvokeLogical(logicalContext, bus)
                 .ConfigureAwait(false);
@@ -97,28 +74,28 @@ namespace AsyncDolls.Pipeline.Incoming
             currentContext.AbortHandlerInvocation();
         }
 
-        Task InvokeLogical(IncomingLogicalContext context, IBusForHandler bus)
+        Task InvokeLogical(IncomingLogicalContext context, IBusForHandler bus, int currentIndex = 0)
         {
-            if (executingLogicalPipeline.Count == 0)
+            if (currentIndex == registeredLogicalPipeline.Count)
             {
                 return Task.CompletedTask;
             }
 
-            IIncomingLogicalStep step = executingLogicalPipeline.Dequeue();
+            IIncomingLogicalStep step = registeredLogicalPipeline[currentIndex];
 
-            return step.Invoke(context, bus, () => InvokeLogical(context, bus));
+            return step.Invoke(context, bus, () => InvokeLogical(context, bus, currentIndex + 1));
         }
 
-        Task InvokeTransport(IncomingTransportContext context, IBusForHandler bus)
+        Task InvokeTransport(IncomingTransportContext context, IBusForHandler bus, int currentIndex = 0)
         {
-            if (executingTransportPipeline.Count == 0)
+            if (currentIndex == registeredTransportPipeline.Count)
             {
                 return Task.CompletedTask;
             }
 
-            IIncomingTransportStep step = executingTransportPipeline.Dequeue();
+            IIncomingTransportStep step = registeredTransportPipeline[currentIndex];
 
-            return step.Invoke(context, bus, () => InvokeTransport(context, bus));
+            return step.Invoke(context, bus, () => InvokeTransport(context, bus, currentIndex + 1));
         }
 
         class LazyLogicalStep : IIncomingLogicalStep

@@ -7,11 +7,10 @@ namespace AsyncDolls.Pipeline
     /// <summary>
     ///     The context is a key value bag which allows typed retrieval of values.
     /// </summary>
-    public abstract class Context : ISupportSnapshots
+    public abstract class Context
     {
         readonly Stack<IDictionary<string, Entry>> snapshots = new Stack<IDictionary<string, Entry>>();
         readonly IDictionary<string, Entry> stash = new Dictionary<string, Entry>();
-        ISupportSnapshots chain;
 
         protected Context(EndpointConfiguration.ReadOnly configuration)
         {
@@ -63,16 +62,6 @@ namespace AsyncDolls.Pipeline
         public void Set<T>(string key, T t, ShouldBeSnapshotted candidateForSnapshot = ShouldBeSnapshotted.No)
         {
             stash[key] = new Entry(t, candidateForSnapshot);
-        }
-
-        internal void SetChain(ISupportSnapshots chain)
-        {
-            this.chain = chain;
-        }
-
-        internal IDisposable CreateSnapshot()
-        {
-            return new SnapshotRegion(chain, this);
         }
 
         class Entry

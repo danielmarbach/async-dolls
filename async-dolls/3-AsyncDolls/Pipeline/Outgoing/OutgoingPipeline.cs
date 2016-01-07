@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace AsyncDolls.Pipeline.Outgoing
 {
-    public class OutgoingPipeline : IOutgoingTransportStepRegisterer, IOutgoingLogicalStepRegisterer, ISupportSnapshots
+    public class OutgoingPipeline : IOutgoingTransportStepRegisterer, IOutgoingLogicalStepRegisterer
     {
         readonly Queue<IOutgoingLogicalStep> registeredlogicalPipelineSteps;
         readonly Queue<IOutgoingTransportStep> registeredTransportPipelineSteps;
@@ -76,7 +76,6 @@ namespace AsyncDolls.Pipeline.Outgoing
         {
             executingLogicalPipeline = new Queue<IOutgoingLogicalStep>(registeredlogicalPipelineSteps);
             var logicalContext = new OutgoingLogicalContext(outgoingLogicalMessage, options, configuration);
-            logicalContext.SetChain(this);
             await InvokeLogical(logicalContext)
                 .ConfigureAwait(false);
 
@@ -85,7 +84,6 @@ namespace AsyncDolls.Pipeline.Outgoing
 
             executingTransportPipeline = new Queue<IOutgoingTransportStep>(registeredTransportPipelineSteps);
             var transportContext = new OutgoingTransportContext(outgoingLogicalMessage, outgoingTransportMessage, options, configuration, incomingTransportMessage);
-            transportContext.SetChain(this);
             await InvokeTransport(transportContext)
                 .ConfigureAwait(false);
         }

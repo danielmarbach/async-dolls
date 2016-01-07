@@ -129,7 +129,6 @@
     <Compile Include="3-AsyncDolls\Pipeline\Incoming\MessageHandler.cs" />
     <Compile Include="3-AsyncDolls\Pipeline\Incoming\NoOpDeadLetter.cs" />
     <Compile Include="3-AsyncDolls\Pipeline\Incoming\RetryMessagesStep.cs" />
-    <Compile Include="3-AsyncDolls\Pipeline\ISupportSnapshots.cs" />
     <Compile Include="3-AsyncDolls\Pipeline\LogicalMessage.cs" />
     <Compile Include="3-AsyncDolls\Pipeline\LogicalMessageFactory.cs" />
     <Compile Include="3-AsyncDolls\Pipeline\NewtonsoftJsonMessageSerializer.cs" />
@@ -156,7 +155,6 @@
     <Compile Include="3-AsyncDolls\Pipeline\Outgoing\SendRessourceManager.cs" />
     <Compile Include="3-AsyncDolls\Pipeline\Outgoing\SerializeMessageStep.cs" />
     <Compile Include="3-AsyncDolls\Pipeline\ShouldBeSnapshotted.cs" />
-    <Compile Include="3-AsyncDolls\Pipeline\SnapshotRegion.cs" />
     <Compile Include="3-AsyncDolls\Pipeline\TypedHandlerRegistryExtensions.cs" />
     <Compile Include="3-AsyncDolls\PublishOptions.cs" />
     <Compile Include="3-AsyncDolls\Queue.cs" />
