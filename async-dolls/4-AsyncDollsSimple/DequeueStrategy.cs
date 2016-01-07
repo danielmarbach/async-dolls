@@ -31,7 +31,7 @@ namespace AsyncDollsSimple.Dequeuing
             tokenSource = new CancellationTokenSource();
             var token = tokenSource.Token;
 
-            pumpTask = Task.Factory.StartNew(async () =>
+            pumpTask = Task.Run(async () =>
             {
                 while (!token.IsCancellationRequested)
                 {
@@ -42,8 +42,7 @@ namespace AsyncDollsSimple.Dequeuing
                     {
                         var task = onMessageAsync(message);
 
-                        runningTasks.AddOrUpdate(task, task, (k, v) => task)
-                            .Ignore();
+                        runningTasks.TryAdd(task, task);
 
                         task.ContinueWith(t =>
                         {
@@ -59,8 +58,7 @@ namespace AsyncDollsSimple.Dequeuing
                     }
 
                 }
-            }, token, TaskCreationOptions.LongRunning, TaskScheduler.Default)
-            .Unwrap();
+            }, token);
 
             return Task.CompletedTask;
         }
