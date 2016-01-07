@@ -20,14 +20,14 @@ namespace AsyncDolls
         public void TheDollsGeneric()
         {
             Action done = () => { Console.WriteLine("Done"); };
-            var actions = new Queue<Action<Action>>();
 
-            actions.Enqueue(Method1);
-            actions.Enqueue(Method2);
-            actions.Enqueue(Method3);
-
-            // Partial application
-            actions.Enqueue(a => done());
+            var actions = new List<Action<Action>>
+            {
+                Method1,
+                Method2,
+                Method3,
+                a => done()
+            };
 
             Invoke(actions);
         }
@@ -51,13 +51,13 @@ namespace AsyncDolls
             next();
         }
 
-        static void Invoke(Queue<Action<Action>> actions)
+        static void Invoke(List<Action<Action>> actions, int currentIndex = 0)
         {
-            if(actions.Count == 0)
+            if (currentIndex == actions.Count)
                 return;
 
-            var action = actions.Dequeue();
-            action(() => Invoke(actions));
+            var action = actions[currentIndex];
+            action(() => Invoke(actions, currentIndex + 1));
         }
 
         [Test]
@@ -81,14 +81,13 @@ namespace AsyncDolls
                 return Task.CompletedTask;
             };
 
-            var actions = new Queue<Func<Func<Task>, Task>>();
-
-            actions.Enqueue(MethodAsync1);
-            actions.Enqueue(MethodAsync2);
-            actions.Enqueue(MethodAsync3);
-
-            // Partial application
-            actions.Enqueue(a => done());
+            var actions = new List<Func<Func<Task>, Task>>
+            {
+                MethodAsync1,
+                MethodAsync2,
+                MethodAsync3,
+                a => done()
+            };
 
             await Invoke(actions);
         }
@@ -111,13 +110,13 @@ namespace AsyncDolls
             return next();
         }
 
-        static Task Invoke(Queue<Func<Func<Task>, Task>> actions)
+        static Task Invoke(List<Func<Func<Task>, Task>> actions, int currentIndex = 0)
         {
-            if (actions.Count == 0)
+            if (currentIndex == actions.Count)
                 return Task.CompletedTask;
 
-            var action = actions.Dequeue();
-            return action(() => Invoke(actions));
+            var action = actions[currentIndex];
+            return action(() => Invoke(actions, currentIndex + 1));
         }
 
         [Test]
@@ -135,13 +134,14 @@ namespace AsyncDolls
                 }
             };
 
-            var actions = new Queue<Func<Func<Task>, Task>>();
-
-            actions.Enqueue(MethodAsync1);
-            actions.Enqueue(MethodAsync2);
-            actions.Enqueue(MethodAsync3);
-            actions.Enqueue(exceptionHandler);
-            actions.Enqueue(EvilMethod);
+            var actions = new List<Func<Func<Task>, Task>>
+            {
+                MethodAsync1,
+                MethodAsync2,
+                MethodAsync3,
+                exceptionHandler,
+                EvilMethod
+            };
 
             await Invoke(actions);
         }
@@ -155,11 +155,12 @@ namespace AsyncDolls
         [Test]
         public async Task TheAsyncDollWithFloatingState()
         {
-            var actions = new Queue<Func<Context, Func<Task>, Task>>();
-
-            actions.Enqueue(MethodAsyncWithContext1);
-            actions.Enqueue(MethodAsyncWithContext2);
-            actions.Enqueue(MethodAsynWithContextc3);
+            var actions = new List<Func<Context, Func<Task>, Task>>
+            {
+                MethodAsyncWithContext1,
+                MethodAsyncWithContext2,
+                MethodAsynWithContextc3
+            };
 
             var context = new Context();
             context.SetLogger(Console.WriteLine);
@@ -185,31 +186,30 @@ namespace AsyncDolls
             return next();
         }
 
-        static Task Invoke(Context context, Queue<Func<Context, Func<Task>, Task>> actions)
+        static Task Invoke(Context context, List<Func<Context, Func<Task>, Task>> actions, int currentIndex = 0)
         {
-            if (actions.Count == 0)
+            if (currentIndex == actions.Count)
                 return Task.CompletedTask;
 
-            var action = actions.Dequeue();
-            return action(context, () => Invoke(context, actions));
+            var action = actions[currentIndex];
+            return action(context, () => Invoke(context, actions, currentIndex + 1));
         }
 
         [Test]
         public async Task NowItGetsALittleBitCrazy()
         {
-            var actions = new Queue<Func<Context, Func<Task>, Task>>();
-
-            actions.Enqueue(MethodAsyncWithContext1);
-            actions.Enqueue(MethodWhichExecutesRestMultipleTimes);
-            actions.Enqueue(MethodAsyncWithContext2);
-            actions.Enqueue(MethodAsynWithContextc3);
+            var actions = new List<Func<Context, Func<Task>, Task>>
+            {
+                MethodAsyncWithContext1,
+                MethodWhichExecutesRestMultipleTimes,
+                MethodAsyncWithContext2,
+                MethodAsynWithContextc3
+            };
 
             var context = new Context();
             context.SetLogger(Console.WriteLine);
             
-            var invoker = new PipelineInvoker();
-            invoker.Actions(actions);
-            context.SetSnapshotter(invoker.TakeSnapshot, invoker.RestoreSnapshot);
+            var invoker = new PipelineInvoker(actions);
 
             await invoker.Invoke(context);
         }
@@ -219,41 +219,26 @@ namespace AsyncDolls
             context.GetLogger()("MethodWhichExecutesRestMultipleTimes");
             for (int i = 0; i < 3; i++)
             {
-                using (context.TakeSnapshot())
-                {
-                    await next().ConfigureAwait(false);
-                }
+                await next().ConfigureAwait(false);
             }
         }
 
         class PipelineInvoker
         {
-            readonly Stack<Queue<Func<Context, Func<Task>, Task>>>  stack = new Stack<Queue<Func<Context, Func<Task>, Task>>>();
-            Queue<Func<Context, Func<Task>, Task>>  executingActions = new Queue<Func<Context, Func<Task>, Task>>();
+            private readonly List<Func<Context, Func<Task>, Task>> executingActions;
 
-            public void Actions(IEnumerable<Func<Context, Func<Task>, Task>> actions)
+            public PipelineInvoker(IEnumerable<Func<Context, Func<Task>, Task>> actions)
             {
-                executingActions = new Queue<Func<Context, Func<Task>, Task>>(actions);
+                executingActions = new List<Func<Context, Func<Task>, Task>>(actions);
             }
 
-            public void TakeSnapshot()
+            public Task Invoke(Context context, int currentIndex = 0)
             {
-                stack.Push(new Queue<Func<Context, Func<Task>, Task>>(executingActions));
-            }
-
-            public void RestoreSnapshot()
-            {
-                // Slightly evil, but reference assignments are atomic
-                executingActions = stack.Pop();
-            }
-
-            public Task Invoke(Context context)
-            {
-                if (executingActions.Count == 0)
+                if (currentIndex == executingActions.Count)
                     return Task.CompletedTask;
 
-                var action = executingActions.Dequeue();
-                return action(context, () => Invoke(context));
+                var action = executingActions[currentIndex];
+                return action(context, () => Invoke(context, currentIndex + 1));
             }
         }
 
@@ -297,42 +282,6 @@ namespace AsyncDolls
         class Logger
         {
             public Action<string> Debug { get; internal set; } 
-        }
-    }
-
-    static class ContextSnapshotExtensions
-    {
-        public static void SetSnapshotter(this Context context, Action take, Action restore)
-        {
-            var snapshotter = new Snapshotter { Take = take, Restore = restore };
-            context.Set(snapshotter);
-        }
-
-        public static IDisposable TakeSnapshot(this Context context)
-        {
-            return new SnapshotRegion(context);
-        }
-
-        class Snapshotter
-        {
-            public Action Take { get; internal set; }
-            public Action Restore { get; internal set; }
-        }
-
-        class SnapshotRegion : IDisposable
-        {
-            private readonly Context context;
-
-            public SnapshotRegion(Context context)
-            {
-                this.context = context;
-                context.Get<Snapshotter>().Take();
-            }
-
-            public void Dispose()
-            {
-                context.Get<Snapshotter>().Restore();
-            }
         }
     }
 }

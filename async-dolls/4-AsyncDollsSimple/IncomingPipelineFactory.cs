@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AsyncDollsSimple.Dequeuing
 {
@@ -16,14 +17,9 @@ namespace AsyncDollsSimple.Dequeuing
 
         public IncomingPipeline Create()
         {
-            var pipeline = new IncomingPipeline();
+            var steps = registeredStepFactories.Select(stepFactory => stepFactory()).ToList();
 
-            foreach (var stepFactory in registeredStepFactories)
-            {
-                pipeline.Register(stepFactory());
-            }
-
-            return pipeline;
+            return new IncomingPipeline(steps);
         }
     }
 }

@@ -5,37 +5,28 @@ namespace AsyncDollsSimple.Dequeuing
 {
     public class IncomingPipeline
     {
-        readonly Queue<IIncomingStep> registeredSteps;
-        Queue<IIncomingStep> executingSteps;
+        readonly List<IIncomingStep> executingSteps;
 
-        public IncomingPipeline()
+        public IncomingPipeline(IEnumerable<IIncomingStep> steps)
         {
-            registeredSteps = new Queue<IIncomingStep>();
-        }
-
-        public IncomingPipeline Register(IIncomingStep step)
-        {
-            registeredSteps.Enqueue(step);
-
-            return this;
+            executingSteps = new List<IIncomingStep>(steps);
         }
 
         public Task Invoke(TransportMessage message)
         {
-            executingSteps = new Queue<IIncomingStep>(registeredSteps);
             return InnerInvoke(message);
         }
 
-        Task InnerInvoke(TransportMessage message)
+        Task InnerInvoke(TransportMessage message, int currentIndex = 0)
         {
-            if (executingSteps.Count == 0)
+            if (currentIndex == executingSteps.Count)
             {
                 return Task.CompletedTask;
             }
 
-            IIncomingStep step = executingSteps.Dequeue();
+            IIncomingStep step = executingSteps[currentIndex];
 
-            return step.Invoke(message, () => InnerInvoke(message));
+            return step.Invoke(message, () => InnerInvoke(message, currentIndex + 1));
         }
     }
 }
