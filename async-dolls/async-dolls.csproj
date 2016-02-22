@@ -191,7 +191,6 @@
     <Compile Include="4-AsyncDollsSimple\TaskCompletionSource.cs" />
     <Compile Include="4-AsyncDollsSimple\TransportMessage.cs" />
     <Compile Include="Infrastructure\DanielMarbach.cs" />
-    <Compile Include="Infrastructure\GiveAway.cs" />
     <Compile Include="Infrastructure\Slide.cs" />
     <Compile Include="Infrastructure\SlideExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -204,9 +203,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Giveaway.pptx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

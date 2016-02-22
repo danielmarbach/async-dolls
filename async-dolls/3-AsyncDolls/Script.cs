@@ -241,14 +241,6 @@ namespace AsyncDolls
                 return action(context, () => Invoke(context, currentIndex + 1));
             }
         }
-
-        [Test]
-        [Explicit]
-        public async Task TheEnd()
-        {
-            var giveAway = new GiveAway();
-            await giveAway.WorthThousandDollars();
-        }
     }
 
     class Context
