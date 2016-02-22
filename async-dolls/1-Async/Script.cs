@@ -130,6 +130,48 @@ namespace AsyncDolls
             await actualTask;
             Console.WriteLine(DateTime.Now + " : Actual task done.");
         }
+        [Test]
+        public async Task CancellingTheTask()
+        {
+            var tokenSource = new CancellationTokenSource();
+            tokenSource.Cancel();
+            var token = tokenSource.Token;
+            
+            var cancelledTask = Task.Run(() => { }, token); // Passing in the token only means the task is transitioning into cancelled state
+            Console.WriteLine(DateTime.Now + " : "+ cancelledTask.Status);
+
+
+            try
+            {
+                await cancelledTask; // awaiting will rethrow
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine(DateTime.Now + " : Throws when awaited");
+                Console.WriteLine(DateTime.Now + " : "+ cancelledTask.Status);
+            }
+        }
+
+        [Test]
+        public async Task CancelllingTheOperationInsideTheTask()
+        {
+            var tokenSource = new CancellationTokenSource();
+            tokenSource.CancelAfter(TimeSpan.FromSeconds(5));
+            var token = tokenSource.Token;
+
+            var cancelledTask = Task.Run(async () => { await Task.Delay(TimeSpan.FromMinutes(1), token); }, token); // Passing in the token only means the task is transitioning into cancelled state
+            Console.WriteLine(DateTime.Now + " : " + cancelledTask.Status);
+
+            try
+            {
+                await cancelledTask; // awaiting will rethrow
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine(DateTime.Now + " : Throws when awaited");
+                Console.WriteLine(DateTime.Now + " : " + cancelledTask.Status);
+            }
+        }
         public async Task ACompleteExampleMixingConcurrentAndAsynchronousProcessingWithPotentialBlockingOperations()
         {
             var runningTasks = new ConcurrentDictionary<Task, Task>();
