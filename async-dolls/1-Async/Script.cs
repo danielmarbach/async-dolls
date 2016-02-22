@@ -108,6 +108,28 @@ namespace AsyncDolls
         }
 
         [Test]
+        public async Task Unwrapping()
+        {
+            Console.WriteLine(DateTime.Now + " : Starting proxy task");
+            Task<Task> proxyTask = Task.Factory.StartNew(async () =>
+            {
+                await Task.Delay(TimeSpan.FromSeconds(10));
+                Console.WriteLine("Done inside proxy");
+            });
+            await proxyTask;
+
+            Console.WriteLine(DateTime.Now + " : Proxy task done.");
+
+            Console.WriteLine(DateTime.Now + " : Starting actual task");
+            Task actualTask = Task.Factory.StartNew(async () =>
+            {
+                await Task.Delay(TimeSpan.FromSeconds(10));
+                Console.WriteLine("Done inside actual");
+            }).Unwrap();
+
+            await actualTask;
+            Console.WriteLine(DateTime.Now + " : Actual task done.");
+        }
         public async Task ACompleteExampleMixingConcurrentAndAsynchronousProcessingWithPotentialBlockingOperations()
         {
             var runningTasks = new ConcurrentDictionary<Task, Task>();
