@@ -108,6 +108,22 @@ namespace AsyncDolls
         }
 
         [Test]
+        public async Task SequentialVsConcurrent()
+        {
+            var sequential = Enumerable.Range(0, 4).Select(t => Task.Delay(2500));
+
+            Console.WriteLine(DateTime.Now + " : Starting sequential.");
+            foreach (var task in sequential)
+            {
+                await task;
+            }
+            Console.WriteLine(DateTime.Now + " : Done sequential.");
+
+            Console.WriteLine(DateTime.Now + " : Starting concurrent.");
+            var concurrent = Enumerable.Range(0, 4).Select(t => Task.Delay(2500));
+            await Task.WhenAll(concurrent);
+            Console.WriteLine(DateTime.Now + " : Done concurrent.");
+        }
         public async Task Unwrapping()
         {
             Console.WriteLine(DateTime.Now + " : Starting proxy task");
