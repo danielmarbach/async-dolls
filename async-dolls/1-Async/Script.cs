@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
@@ -124,6 +125,45 @@ namespace AsyncDolls
             await Task.WhenAll(concurrent);
             Console.WriteLine(DateTime.Now + " : Done concurrent.");
         }
+
+        [Test]
+        // Release mode and dotPeek
+        public async Task ShortcutTheStatemachine()
+        {
+            await DoesNotShortcut();
+
+            await DoesShortcut();
+        }
+
+        private static async Task DoesNotShortcut()
+        {
+            await Task.Delay(1);
+        }
+
+        private static Task DoesShortcut()
+        {
+            return Task.Delay(1);
+        }
+
+        /*
+
+        private static Task DoesNotShortcut()
+        {
+          AsyncScript.\u003CDoesNotShortcut\u003Ed__12 stateMachine;
+          stateMachine.\u003C\u003Et__builder = AsyncTaskMethodBuilder.Create();
+          stateMachine.\u003C\u003E1__state = -1;
+          stateMachine.\u003C\u003Et__builder.Start<AsyncScript.\u003CDoesNotShortcut\u003Ed__12>(ref stateMachine);
+          return stateMachine.\u003C\u003Et__builder.Task;
+        }
+
+        private static Task DoesShortcut()
+        {
+          return Task.Delay(1);
+        }
+        
+        */
+
+        [Test]
         public async Task Unwrapping()
         {
             Console.WriteLine(DateTime.Now + " : Starting proxy task");
@@ -162,7 +202,6 @@ namespace AsyncDolls
             
             var cancelledTask = Task.Run(() => { }, token); // Passing in the token only means the task is transitioning into cancelled state
             Console.WriteLine(DateTime.Now + " : "+ cancelledTask.Status);
-
 
             try
             {
@@ -250,7 +289,7 @@ namespace AsyncDolls
 
                             semaphore.Release();
                         }, CancellationToken.None, TaskCreationOptions.HideScheduler, scheduler)
-                            .Unwrap();
+                        .Unwrap();
 
                         runningTasks.TryAdd(task, task);
 
@@ -259,7 +298,7 @@ namespace AsyncDolls
                             Task taskToBeRemoved;
                             runningTasks.TryRemove(t, out taskToBeRemoved);
                         }, TaskContinuationOptions.ExecuteSynchronously)
-                            .Ignore();
+                        .Ignore();
                     }
                 }, token);
 
@@ -310,7 +349,7 @@ namespace AsyncDolls
                             Task taskToBeRemoved;
                             runningTasks.TryRemove(t, out taskToBeRemoved);
                         }, TaskContinuationOptions.ExecuteSynchronously)
-                            .Ignore();
+                        .Ignore();
                     }
                 }, token); // TaskCreationOptions.LongRunning is useless with async/await;
 
