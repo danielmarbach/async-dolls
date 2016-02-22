@@ -130,6 +130,13 @@ namespace AsyncDolls
             await actualTask;
             Console.WriteLine(DateTime.Now + " : Actual task done.");
         }
+
+        [Test]
+        public async Task LongRunningIsWaste()
+        {
+            
+        }
+
         [Test]
         public async Task CancellingTheTask()
         {
@@ -197,6 +204,8 @@ namespace AsyncDolls
             }
             Console.WriteLine(DateTime.Now + " : Done");
         }
+
+        [Test]
         public async Task ACompleteExampleMixingConcurrentAndAsynchronousProcessingWithPotentialBlockingOperations()
         {
             var runningTasks = new ConcurrentDictionary<Task, Task>();
@@ -208,7 +217,7 @@ namespace AsyncDolls
 
             try
             {
-                var pumpTask = Task.Factory.StartNew(async () =>
+                var pumpTask = Task.Run(async () =>
                 {
                     int taskNumber = 0;
                     while (!token.IsCancellationRequested)
@@ -225,7 +234,7 @@ namespace AsyncDolls
 
                             semaphore.Release();
                         }, CancellationToken.None, TaskCreationOptions.HideScheduler, scheduler)
-                        .Unwrap();
+                            .Unwrap();
 
                         runningTasks.TryAdd(task, task);
 
@@ -234,10 +243,9 @@ namespace AsyncDolls
                             Task taskToBeRemoved;
                             runningTasks.TryRemove(t, out taskToBeRemoved);
                         }, TaskContinuationOptions.ExecuteSynchronously)
-                        .Ignore();
+                            .Ignore();
                     }
-                }, token) // TaskCreationOptions.LongRunning is useless with async/await
-                .Unwrap();
+                }, token);
 
                 await pumpTask;
             }
@@ -266,7 +274,7 @@ namespace AsyncDolls
 
             try
             {
-                var pumpTask = Task.Factory.StartNew(async () =>
+                var pumpTask = Task.Run(async () =>
                 {
                     int taskNumber = 0;
                     while (!token.IsCancellationRequested)
@@ -286,10 +294,9 @@ namespace AsyncDolls
                             Task taskToBeRemoved;
                             runningTasks.TryRemove(t, out taskToBeRemoved);
                         }, TaskContinuationOptions.ExecuteSynchronously)
-                        .Ignore();
+                            .Ignore();
                     }
-                }, token) // TaskCreationOptions.LongRunning is useless with async/await
-                .Unwrap();
+                }, token); // TaskCreationOptions.LongRunning is useless with async/await;
 
                 await pumpTask;
             }
