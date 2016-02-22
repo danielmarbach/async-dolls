@@ -172,6 +172,31 @@ namespace AsyncDolls
                 Console.WriteLine(DateTime.Now + " : " + cancelledTask.Status);
             }
         }
+
+        [Test]
+        public async Task GracefulShutdown()
+        {
+            var tokenSource = new CancellationTokenSource();
+            tokenSource.CancelAfter(TimeSpan.FromSeconds(5));
+            var token = tokenSource.Token;
+
+            var cancelledTask = Task.Run(async () =>
+            {
+                await Task.Delay(TimeSpan.FromMinutes(1), token).IgnoreCancellation();
+            }, CancellationToken.None);
+            Console.WriteLine(DateTime.Now + " : " + cancelledTask.Status);
+
+            try
+            {
+                await cancelledTask; // awaiting will rethrow
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine(DateTime.Now + " : Should not throw when awaited");
+                Console.WriteLine(DateTime.Now + " : " + cancelledTask.Status);
+            }
+            Console.WriteLine(DateTime.Now + " : Done");
+        }
         public async Task ACompleteExampleMixingConcurrentAndAsynchronousProcessingWithPotentialBlockingOperations()
         {
             var runningTasks = new ConcurrentDictionary<Task, Task>();
@@ -400,6 +425,17 @@ namespace AsyncDolls
     {
         public static void Ignore(this Task task)
         {
+        }
+
+        public static async Task IgnoreCancellation(this Task task)
+        {
+            try
+            {
+                await task.ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+            }
         }
     }
 
