@@ -12,10 +12,6 @@ using NUnit.Framework;
 
 namespace AsyncDolls
 {
-    /// <summary>
-    /// Contains a lot of white space. Optimized for Consolas 14 pt 
-    /// and Full HD resolution
-    /// </summary>
     [TestFixture]
     public class AsyncScript
     {
@@ -24,7 +20,7 @@ namespace AsyncDolls
         {
             var daniel = new DanielMarbach();
             daniel
-                .Is("CEO").Of("tracelight Gmbh").In("Switzerland")
+                .Is("CEO").Of("tracelight GmbH").In("Switzerland")
                 .and
                 .WorkingFor("Particular Software").TheFolksBehind("NServiceBus")
                 .Reach("@danielmarbach")
@@ -247,7 +243,7 @@ namespace AsyncDolls
             var cancelledTask = Task.Run(async () =>
             {
                 await Task.Delay(TimeSpan.FromMinutes(1), token).IgnoreCancellation();
-            }, CancellationToken.None);
+            });
             Console.WriteLine(DateTime.Now + " : " + cancelledTask.Status);
 
             try
