@@ -2,8 +2,9 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using AsyncDollsSimple.Dequeuing;
 
-namespace AsyncDollsSimple.Dequeuing
+namespace AsyncDolls
 {
     /// <summary>
     /// An async-compatible countdown event.

@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,14 +27,13 @@ namespace AsyncDolls
         }
 
         [Test]
-        public async Task AsyncRecap()
+        public async Task CPUBound()
         {
-            // Parallel
-            Parallel.For(0, 1000, CpuBoundMethod); // or Parallel.ForEach
-            await Task.Run(() => CpuBoundMethod(10)); // or Task.Factory.StartNew(), if in doubt use Task.Run
+            Parallel.For(0, 1000, CpuBoundMethod);
+            Parallel.ForEach(Enumerable.Range(1000, 2000), CpuBoundMethod);
 
-            // Asynchronous
-            await IoBoundMethod(".\\IoBoundMethod.txt"); // if true IOBound don't use Task.Run, StartNew
+            await Task.Run(() => CpuBoundMethod(2001));
+            await Task.Factory.StartNew(() => CpuBoundMethod(2002));
         }
 
         static void CpuBoundMethod(int i)
@@ -43,16 +41,39 @@ namespace AsyncDolls
             Console.WriteLine(i);
         }
 
-        static async Task IoBoundMethod(string path)
+        [Test]
+        public async Task IOBound()
         {
-            using (var stream = new FileStream(path, FileMode.OpenOrCreate))
+            await IoBoundMethod();
+        }
+
+        static async Task IoBoundMethod()
+        {
+            using (var stream = new FileStream(".\\IoBoundMethod.txt", FileMode.OpenOrCreate))
             using (var writer = new StreamWriter(stream))
             {
-                await writer.WriteLineAsync("Yehaa " + DateTime.Now);
-                await writer.FlushAsync();
+                await writer.WriteLineAsync("42");
                 writer.Close();
                 stream.Close();
             }
+        }
+
+        [Test]
+        public async Task Sequential()
+        {
+            var sequential = Enumerable.Range(0, 4).Select(t => Task.Delay(1500));
+
+            foreach (var task in sequential)
+            {
+                await task;
+            }
+        }
+
+        [Test]
+        public async Task Concurrent()
+        {
+            var concurrent = Enumerable.Range(0, 4).Select(t => Task.Delay(1500));
+            await Task.WhenAll(concurrent);
         }
 
         [Test]
@@ -61,16 +82,16 @@ namespace AsyncDolls
             try
             {
                 AvoidAsyncVoid();
+
             }
             catch (InvalidOperationException e)
             {
-                // where is the exception?
                 Console.WriteLine(e);
             }
             await Task.Delay(100);
         }
 
-        static async void AvoidAsyncVoid() // Fire & Forget, can't be awaited, exception: EventHandlers
+        static async void AvoidAsyncVoid()
         {
             Console.WriteLine("Going inside async void.");
             await Task.Delay(10);
@@ -79,27 +100,8 @@ namespace AsyncDolls
         }
 
         [Test]
-        public async Task SequentialVsConcurrent()
-        {
-            var sequential = Enumerable.Range(0, 4).Select(t => Task.Delay(2500));
-
-            Console.WriteLine(DateTime.Now + " : Starting sequential.");
-            foreach (var task in sequential)
-            {
-                await task;
-            }
-            Console.WriteLine(DateTime.Now + " : Done sequential.");
-
-            Console.WriteLine(DateTime.Now + " : Starting concurrent.");
-            var concurrent = Enumerable.Range(0, 4).Select(t => Task.Delay(2500));
-            await Task.WhenAll(concurrent);
-            Console.WriteLine(DateTime.Now + " : Done concurrent.");
-        }
-
-        [Test]
         public async Task ConfigureAwait()
         {
-            // Attention: In unit test everything behaves differently, I'll explain why
             // ReSharper disable once PossibleNullReferenceException
             await Process.Start(new ProcessStartInfo(@".\configureawait.exe") { UseShellExecute = false });
         }
@@ -107,14 +109,15 @@ namespace AsyncDolls
         [Test]
         public void DontMixBlockingAndAsync()
         {
-            SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext()); // Let's simulate wpf stuff
+            SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
 
-            Delay(15); // what happens here? How can we fix this?
+            Delay(15);
         }
+
 
         static void Delay(int milliseconds)
         {
-            DelayAsync(milliseconds).Wait(); // Similar evilness is Thread.Sleep, Semaphore.Wait..
+            DelayAsync(milliseconds).Wait();
         }
 
         static async Task DelayAsync(int milliseconds)
@@ -122,10 +125,7 @@ namespace AsyncDolls
             await Task.Delay(milliseconds);
         }
 
-
-
         [Test]
-        // Release mode and dotPeek
         public async Task ShortcutTheStatemachine()
         {
             await DoesNotShortcut();
@@ -144,225 +144,20 @@ namespace AsyncDolls
         }
 
         /*
+private static Task DoesNotShortcut()
+{
+  AsyncScript.\u003CDoesNotShortcut\u003Ed__12 stateMachine;
+  stateMachine.\u003C\u003Et__builder = AsyncTaskMethodBuilder.Create();
+  stateMachine.\u003C\u003E1__state = -1;
+  stateMachine.\u003C\u003Et__builder.Start<AsyncScript.\u003CDoesNotShortcut\u003Ed__12>(ref stateMachine);
+  return stateMachine.\u003C\u003Et__builder.Task;
+}
+private static Task DoesShortcut()
+{
+  return Task.Delay(1);
+}
 
-        private static Task DoesNotShortcut()
-        {
-          AsyncScript.\u003CDoesNotShortcut\u003Ed__12 stateMachine;
-          stateMachine.\u003C\u003Et__builder = AsyncTaskMethodBuilder.Create();
-          stateMachine.\u003C\u003E1__state = -1;
-          stateMachine.\u003C\u003Et__builder.Start<AsyncScript.\u003CDoesNotShortcut\u003Ed__12>(ref stateMachine);
-          return stateMachine.\u003C\u003Et__builder.Task;
-        }
-
-        private static Task DoesShortcut()
-        {
-          return Task.Delay(1);
-        }
-        
-        */
-
-        [Test]
-        public async Task Unwrapping()
-        {
-            Console.WriteLine(DateTime.Now + " : Starting proxy task");
-            Task<Task> proxyTask = Task.Factory.StartNew(async () =>
-            {
-                await Task.Delay(TimeSpan.FromSeconds(10));
-                Console.WriteLine("Done inside proxy");
-            });
-            await proxyTask;
-
-            Console.WriteLine(DateTime.Now + " : Proxy task done.");
-
-            Console.WriteLine(DateTime.Now + " : Starting actual task");
-            Task actualTask = Task.Factory.StartNew(async () =>
-            {
-                await Task.Delay(TimeSpan.FromSeconds(10));
-                Console.WriteLine("Done inside actual");
-            }).Unwrap();
-
-            await actualTask;
-            Console.WriteLine(DateTime.Now + " : Actual task done.");
-        }
-
-        [Test]
-        public async Task LongRunningIsWaste()
-        {
-            
-        }
-
-        [Test]
-        public async Task CancellingTheTask()
-        {
-            var tokenSource = new CancellationTokenSource();
-            tokenSource.Cancel();
-            var token = tokenSource.Token;
-            
-            var cancelledTask = Task.Run(() => { }, token); // Passing in the token only means the task is transitioning into cancelled state
-            Console.WriteLine(DateTime.Now + " : "+ cancelledTask.Status);
-
-            try
-            {
-                await cancelledTask; // awaiting will rethrow
-            }
-            catch (OperationCanceledException)
-            {
-                Console.WriteLine(DateTime.Now + " : Throws when awaited");
-                Console.WriteLine(DateTime.Now + " : "+ cancelledTask.Status);
-            }
-        }
-
-        [Test]
-        public async Task CancelllingTheOperationInsideTheTask()
-        {
-            var tokenSource = new CancellationTokenSource();
-            tokenSource.CancelAfter(TimeSpan.FromSeconds(5));
-            var token = tokenSource.Token;
-
-            var cancelledTask = Task.Run(async () => { await Task.Delay(TimeSpan.FromMinutes(1), token); }, token); // Passing in the token only means the task is transitioning into cancelled state
-            Console.WriteLine(DateTime.Now + " : " + cancelledTask.Status);
-
-            try
-            {
-                await cancelledTask; // awaiting will rethrow
-            }
-            catch (OperationCanceledException)
-            {
-                Console.WriteLine(DateTime.Now + " : Throws when awaited");
-                Console.WriteLine(DateTime.Now + " : " + cancelledTask.Status);
-            }
-        }
-
-        [Test]
-        public async Task GracefulShutdown()
-        {
-            var tokenSource = new CancellationTokenSource();
-            tokenSource.CancelAfter(TimeSpan.FromSeconds(5));
-            var token = tokenSource.Token;
-
-            var cancelledTask = Task.Run(async () =>
-            {
-                await Task.Delay(TimeSpan.FromMinutes(1), token).IgnoreCancellation();
-            });
-            Console.WriteLine(DateTime.Now + " : " + cancelledTask.Status);
-
-            try
-            {
-                await cancelledTask; // awaiting will rethrow
-            }
-            catch (OperationCanceledException)
-            {
-                Console.WriteLine(DateTime.Now + " : Should not throw when awaited");
-                Console.WriteLine(DateTime.Now + " : " + cancelledTask.Status);
-            }
-            Console.WriteLine(DateTime.Now + " : Done");
-        }
-
-        [Test]
-        public async Task ACompleteExampleMixingConcurrentAndAsynchronousProcessingWithPotentialBlockingOperations()
-        {
-            var runningTasks = new ConcurrentDictionary<Task, Task>();
-            var semaphore = new SemaphoreSlim(100);
-            var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-            var token = tokenSource.Token;
-            // var scheduler = new QueuedTaskScheduler(TaskScheduler.Default, 2);
-            var scheduler = TaskScheduler.Default;
-
-            try
-            {
-                var pumpTask = Task.Run(async () =>
-                {
-                    int taskNumber = 0;
-                    while (!token.IsCancellationRequested)
-                    {
-                        await semaphore.WaitAsync(token);
-
-                        var task = Task.Factory.StartNew(async () =>
-                        {
-                            int nr = Interlocked.Increment(ref taskNumber);
-
-                            Console.WriteLine("Kick off " + nr + " " + Thread.CurrentThread.ManagedThreadId);
-                            await LibraryCallWhichIsNotTrulyAsync().ConfigureAwait(false);
-                            Console.WriteLine(" back " + nr + " " + Thread.CurrentThread.ManagedThreadId);
-
-                            semaphore.Release();
-                        }, CancellationToken.None, TaskCreationOptions.HideScheduler, scheduler)
-                        .Unwrap();
-
-                        runningTasks.TryAdd(task, task);
-
-                        task.ContinueWith(t =>
-                        {
-                            Task taskToBeRemoved;
-                            runningTasks.TryRemove(t, out taskToBeRemoved);
-                        }, TaskContinuationOptions.ExecuteSynchronously)
-                        .Ignore();
-                    }
-                }, token);
-
-                await pumpTask;
-            }
-            catch (OperationCanceledException)
-            {
-            }
-
-            await Task.WhenAll(runningTasks.Values);
-        }
-
-        // For example MSMQ has no true async API especially when you are dealing with transactions. Then you need to 
-        // use .Receive which is a blocking operation. 
-        private static Task LibraryCallWhichIsNotTrulyAsync()
-        {
-            Thread.Sleep(1000);
-            return Task.CompletedTask;
-        }
-
-        [Test]
-        public async Task ACompleteExampleMixingConcurrentAndAsynchronousProcessingWithTrueAsyncOperations()
-        {
-            var runningTasks = new ConcurrentDictionary<Task, Task>();
-            var semaphore = new SemaphoreSlim(100);
-            var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-            var token = tokenSource.Token;
-
-            try
-            {
-                var pumpTask = Task.Run(async () =>
-                {
-                    int taskNumber = 0;
-                    while (!token.IsCancellationRequested)
-                    {
-                        await semaphore.WaitAsync(token);
-                        int nr = Interlocked.Increment(ref taskNumber);
-
-                        Console.WriteLine("Kick off " + nr + " " + Thread.CurrentThread.ManagedThreadId);
-                        var task = LibraryCallWhichIsTrulyAsync();
-
-                        runningTasks.TryAdd(task, task);
-
-                        task.ContinueWith(t =>
-                        {
-                            Console.WriteLine(" back " + nr + " " + Thread.CurrentThread.ManagedThreadId);
-                            semaphore.Release();
-                            Task taskToBeRemoved;
-                            runningTasks.TryRemove(t, out taskToBeRemoved);
-                        }, TaskContinuationOptions.ExecuteSynchronously)
-                        .Ignore();
-                    }
-                }, token); // TaskCreationOptions.LongRunning is useless with async/await;
-
-                await pumpTask;
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            await Task.WhenAll(runningTasks.Values);
-        }
-
-        private static Task LibraryCallWhichIsTrulyAsync()
-        {
-            return Task.Delay(1000);
-        }
+*/
 
         static ThreadLocal<string> ThreadLocal = new ThreadLocal<string>(() => "Initial Value");
 
@@ -427,87 +222,6 @@ namespace AsyncDolls
         {
             await Task.Yield();
             Console.WriteLine($"Inside Fire: '{Local.Value}'");
-        }
-
-        [Test]
-        public async Task AsyncRecursionWithExceptionHandling()
-        {
-            var sender = new Sender();
-            await sender.RetryOnThrottle(s => s.SendAsync(), TimeSpan.FromMilliseconds(10), 1);
-        }
-    }
-
-    public interface IMessageSender
-    {
-        Task SendAsync();
-    }
-
-    internal class Sender : IMessageSender
-    {
-        private int numberOfTimes = 0;
-
-        public async Task SendAsync()
-        {
-            if (numberOfTimes++ <= 3)
-            {
-                await Task.Delay(1000);
-                throw new InvalidOperationException();
-            }
-        }
-    }
-
-    static class MessageSenderExtensions
-    {
-        public static Task RetryOnThrottle(this IMessageSender sender, Func<IMessageSender, Task> action, TimeSpan delay, int maxRetryAttempts, int retryAttempts = 0)
-        {
-            var task = action(sender);
-
-            return task.ContinueWith(async t =>
-            {
-                var exception = ExceptionDispatchInfo.Capture(t.Exception?.InnerException);
-                var serverBusy = exception.SourceException is InvalidOperationException;
-
-                if (serverBusy && retryAttempts < maxRetryAttempts)
-                {
-                    await Task.Delay(delay);
-                    await sender.RetryOnThrottle(action, delay, maxRetryAttempts, ++retryAttempts);
-                }
-                else if(t.IsFaulted)
-                {
-                    exception.Throw();
-                }
-            })
-            .Unwrap();
-        }
-    }
-
-    static class TaskExtensions
-    {
-        public static void Ignore(this Task task)
-        {
-        }
-
-        public static async Task IgnoreCancellation(this Task task)
-        {
-            try
-            {
-                await task.ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-            }
-        }
-    }
-
-    public static class ProcessExtensions
-    {
-        public static TaskAwaiter<int> GetAwaiter(this Process process)
-        {
-            var tcs = new TaskCompletionSource<int>();
-            process.EnableRaisingEvents = true;
-            process.Exited += (s, e) => tcs.TrySetResult(process.ExitCode);
-            if (process.HasExited) tcs.TrySetResult(process.ExitCode);
-            return tcs.Task.GetAwaiter();
         }
     }
 }

@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace AsyncDollsSimple.Dequeuing
+namespace AsyncDolls
 {
     /// <summary>
     /// Represents the producer side of a <see cref="System.Threading.Tasks.Task"/> unbound to a delegate, providing access to the consumer side through the <see cref="Task"/> property.
