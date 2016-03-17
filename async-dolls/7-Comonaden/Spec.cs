@@ -4,9 +4,13 @@ using System.Threading.Tasks;
 using System.Transactions;
 using NUnit.Framework;
 
-namespace AsyncDolls.AsyncDollsInDepth
+namespace AsyncDolls.Comonaden
 {
+    // http://blogs.msdn.com/b/pfxteam/archive/2013/04/03/tasks-monads-and-linq.aspx
+    // https://github.com/iSynaptic/Monad-Comonad-Precis/blob/master/Precis.cs
+
     [TestFixture]
+    // This is just a playground. In practice this is highly innefficient.
     public class Spec
     {
         [Test]
@@ -66,25 +70,28 @@ namespace AsyncDolls.AsyncDollsInDepth
 
         class DelayBefore : IIncomingStep
         {
-            public async Task Invoke(IncomingContext context, Func<Task> next)
+            public async Task<Continuation> Invoke(IncomingContext context)
             {
                 await Task.Delay(10).ConfigureAwait(false);
-                await next().ConfigureAwait(false);
+
+                return Continuation.Empty;
             }
         }
 
         class DelayAfter : IIncomingStep
         {
-            public async Task Invoke(IncomingContext context, Func<Task> next)
+            public Task<Continuation> Invoke(IncomingContext context)
             {
-                await Task.Delay(10).ConfigureAwait(false);
-                await next().ConfigureAwait(false);
+                return new Continuation
+                {
+                    After = () => Task.Delay(10)
+                };
             }
         }
 
         public class ThrowException : IIncomingStep
         {
-            public async Task Invoke(IncomingContext context, Func<Task> next)
+            public async Task<Continuation> Invoke(IncomingContext context)
             {
                 await Task.Delay(10).ConfigureAwait(false);
 
@@ -94,24 +101,24 @@ namespace AsyncDolls.AsyncDollsInDepth
 
         public class PassThrough : IIncomingStep
         {
-            public Task Invoke(IncomingContext context, Func<Task> next)
+            public Task<Continuation> Invoke(IncomingContext context)
             {
-                return next();
+                return Continuation.Empty;
             }
         }
 
         public class DelayInUsing : IIncomingStep
         {
-            public async Task Invoke(IncomingContext context, Func<Task> next)
+            public async Task<Continuation> Invoke(IncomingContext context)
             {
-                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+                await Task.Delay(10).ConfigureAwait(false);
+
+                return new Continuation
                 {
-                    await Task.Delay(10).ConfigureAwait(false);
-
-                    await next().ConfigureAwait(false);
-
-                    scope.Complete();
-                }
+                    After = () => { scope.Complete(); return Task.CompletedTask; },
+                    Finally = () => { scope.Dispose(); return Task.CompletedTask; }
+                };
             }
         }
 
@@ -124,17 +131,17 @@ namespace AsyncDolls.AsyncDollsInDepth
                 this.countdown = countdown;
             }
 
-            public async Task Invoke(IncomingContext context, Func<Task> next)
+            public Task<Continuation> Invoke(IncomingContext context)
             {
-                try
+                return new Continuation
                 {
-                    await next();
-                }
-                catch (Exception e)
-                {
-                    e.StackTrace.Output();
-                }
-                countdown.Signal();
+                    Catch = async info =>
+                    {
+                        info.SourceException.StackTrace.Output();
+                        countdown.Signal();
+                        return null;
+                    }
+                };
             }
         }
     }

@@ -230,6 +230,16 @@
     <Compile Include="7-AsyncDollsInDepth\PushMessages.cs" />
     <Compile Include="7-AsyncDollsInDepth\Spec.cs" />
     <Compile Include="7-AsyncDollsInDepth\TransportMessage.cs" />
+    <Compile Include="7-Comonaden\Continuation.cs" />
+    <Compile Include="7-Comonaden\HeaderKeys.cs" />
+    <Compile Include="7-Comonaden\IIncomingStep.cs" />
+    <Compile Include="7-Comonaden\IncomingContext.cs" />
+    <Compile Include="7-Comonaden\IncomingPipeline.cs" />
+    <Compile Include="7-Comonaden\IncomingPipelineFactory.cs" />
+    <Compile Include="7-Comonaden\IPushMessages.cs" />
+    <Compile Include="7-Comonaden\PushMessages.cs" />
+    <Compile Include="7-Comonaden\Spec.cs" />
+    <Compile Include="7-Comonaden\TransportMessage.cs" />
     <Compile Include="Infrastructure\AsyncCountdownEvent.cs" />
     <Compile Include="Infrastructure\DanielMarbach.cs" />
     <Compile Include="Infrastructure\ProcessExtensions.cs" />
