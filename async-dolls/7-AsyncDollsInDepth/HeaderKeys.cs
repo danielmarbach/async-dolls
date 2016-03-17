@@ -1,4 +1,4 @@
-namespace AsyncDolls.AsyncDollsInDepth
+namespace AsyncDolls.AsyncStateWithDolls
 {
     public static class HeaderKeys
     {

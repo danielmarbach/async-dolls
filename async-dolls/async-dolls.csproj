@@ -221,6 +221,15 @@
     <Compile Include="6-AsyncStateWithDolls\Script.cs" />
     <Compile Include="6-AsyncStateWithDolls\Spec.cs" />
     <Compile Include="6-AsyncStateWithDolls\TransportMessage.cs" />
+    <Compile Include="7-AsyncDollsInDepth\HeaderKeys.cs" />
+    <Compile Include="7-AsyncDollsInDepth\IIncomingStep.cs" />
+    <Compile Include="7-AsyncDollsInDepth\IncomingContext.cs" />
+    <Compile Include="7-AsyncDollsInDepth\IncomingPipeline.cs" />
+    <Compile Include="7-AsyncDollsInDepth\IncomingPipelineFactory.cs" />
+    <Compile Include="7-AsyncDollsInDepth\IPushMessages.cs" />
+    <Compile Include="7-AsyncDollsInDepth\PushMessages.cs" />
+    <Compile Include="7-AsyncDollsInDepth\Spec.cs" />
+    <Compile Include="7-AsyncDollsInDepth\TransportMessage.cs" />
     <Compile Include="Infrastructure\AsyncCountdownEvent.cs" />
     <Compile Include="Infrastructure\DanielMarbach.cs" />
     <Compile Include="Infrastructure\ProcessExtensions.cs" />
