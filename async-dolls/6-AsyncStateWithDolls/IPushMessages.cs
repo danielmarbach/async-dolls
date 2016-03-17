@@ -1,9 +1,9 @@
 using System;
 using System.Threading.Tasks;
 
-namespace AsyncDollsSimple.Dequeuing
+namespace AsyncDolls.AsyncStateWithDolls
 {
-    public interface IDequeueStrategy
+    public interface IPushMessages
     {
         Task StartAsync(Func<TransportMessage, Task> onMessage);
         Task StopAsync();

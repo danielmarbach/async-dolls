@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using AsyncDolls;
 
-namespace AsyncDollsSimple.Dequeuing
+namespace AsyncDolls.AsyncStateWithDollsTyped
 {
     public class TransportMessage
     {
@@ -25,7 +24,7 @@ namespace AsyncDollsSimple.Dequeuing
             };
         }
 
-        public TransportMessage(AsyncDolls.TransportMessage message)
+        public TransportMessage(TransportMessage message)
         {
             Headers = new Dictionary<string, string>
             {
@@ -39,7 +38,7 @@ namespace AsyncDollsSimple.Dequeuing
             message.Body.Position = 0;
             message.Body.CopyTo(stream);
             stream.Position = 0;
-            this.SetBody(stream);
+            SetBody(stream);
 
             foreach (var pair in message.Headers)
             {
@@ -50,10 +49,7 @@ namespace AsyncDollsSimple.Dequeuing
             }
         }
 
-        public string Id
-        {
-            get { return Headers[HeaderKeys.MessageId]; }
-        }
+        public string Id => Headers[HeaderKeys.MessageId];
 
         public string CorrelationId
         {
@@ -98,12 +94,9 @@ namespace AsyncDollsSimple.Dequeuing
             set { Headers[HeaderKeys.DeliveryCount] = value.ToString(); }
         }
 
-        public IDictionary<string, string> Headers { get; private set; }
+        public IDictionary<string, string> Headers { get; }
 
-        public Stream Body
-        {
-            get { return body ?? (body = new MemoryStream()); }
-        }
+        public Stream Body => body ?? (body = new MemoryStream());
 
         public void SetBody(Stream body)
         {

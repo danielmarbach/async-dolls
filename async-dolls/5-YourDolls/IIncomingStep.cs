@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace AsyncDollsSimple.Dequeuing
+namespace AsyncDolls.YourDolls
 {
     public interface IIncomingStep
     {

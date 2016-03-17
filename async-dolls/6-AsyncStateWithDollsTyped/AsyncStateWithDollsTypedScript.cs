@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Threading;
 using System.Threading.Tasks;
-using AsyncDolls;
 using NUnit.Framework;
 
-namespace AsyncDollsSimple.Dequeuing
+namespace AsyncDolls.AsyncStateWithDollsTyped
 {
     [TestFixture]
-    public class SimpleSpec
+    public class AsyncStateWithDollsTypedScript
     {
         [Test]
         public async Task Do()
@@ -23,9 +21,11 @@ namespace AsyncDollsSimple.Dequeuing
             var pipelineFactory = new IncomingPipelineFactory();
             pipelineFactory.Register(() => new DelayStep());
             pipelineFactory.Register(() => new LogStep());
+            pipelineFactory.Register(() => new PhysicalToLogicalConnector());
             pipelineFactory.Register(() => new DecrementStep(countdown));
 
-            var strategy = new DequeueStrategy(messages, maxConcurrency: 1);
+            var strategy = new PushMessages(messages, maxConcurrency: 1);
+
             await strategy.StartAsync(tm => Connector(pipelineFactory, tm));
 
             await countdown.WaitAsync();
@@ -36,28 +36,37 @@ namespace AsyncDollsSimple.Dequeuing
         static Task Connector(IncomingPipelineFactory factory, TransportMessage message)
         {
             var pipeline = factory.Create();
-            return pipeline.Invoke(message);
+            var context = new IncomingPhysicalContext(message);
+            return pipeline.Invoke(context);
         }
 
-        class DelayStep : IIncomingStep
+        class DelayStep : IncomingStep<IncomingPhysicalContext>
         {
-            public async Task Invoke(TransportMessage message, Func<Task> next)
+            public override async Task Invoke(IncomingPhysicalContext context, Func<Task> next)
             {
                 await Task.Delay(1000).ConfigureAwait(false);
                 await next().ConfigureAwait(false);
             }
         }
 
-        class LogStep : IIncomingStep
+        class LogStep : IncomingStep<IncomingPhysicalContext>
         {
-            public Task Invoke(TransportMessage message, Func<Task> next)
+            public override Task Invoke(IncomingPhysicalContext context, Func<Task> next)
             {
-                Console.WriteLine(message.Id);
+                context.Message.Id.Output();
                 return next();
             }
         }
 
-        class DecrementStep : IIncomingStep
+        class PhysicalToLogicalConnector : StepConnector<IncomingPhysicalContext, IncomingLogicalContext>
+        {
+            public override Task Invoke(IncomingPhysicalContext context, Func<IncomingLogicalContext, Task> next)
+            {
+                return next(new IncomingLogicalContext(new LogicalMessage(), context));
+            }
+        }
+
+        class DecrementStep : IncomingStep<IncomingLogicalContext>
         {
             private readonly AsyncCountdownEvent countdown;
 
@@ -66,8 +75,9 @@ namespace AsyncDollsSimple.Dequeuing
                 this.countdown = countdown;
             }
 
-            public Task Invoke(TransportMessage message, Func<Task> next)
+            public override Task Invoke(IncomingLogicalContext context, Func<Task> next)
             {
+                context.Message.Instance.ToString().Output();
                 countdown.Signal();
                 return next();
             }

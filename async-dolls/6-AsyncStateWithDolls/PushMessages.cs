@@ -2,11 +2,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
-using AsyncDolls;
 
-namespace AsyncDollsSimple.Dequeuing
+namespace AsyncDolls.AsyncStateWithDolls
 {
-    public class DequeueStrategy : IDequeueStrategy
+    public class PushMessages : IPushMessages
     {
         Func<TransportMessage, Task> onMessageAsync;
         private readonly ConcurrentQueue<TransportMessage> messages;
@@ -16,7 +15,7 @@ namespace AsyncDollsSimple.Dequeuing
         private Task pumpTask;
         private readonly int maxConcurrency;
 
-        public DequeueStrategy(ConcurrentQueue<TransportMessage> messages, int maxConcurrency = 100)
+        public PushMessages(ConcurrentQueue<TransportMessage> messages, int maxConcurrency = 100)
         {
             this.maxConcurrency = maxConcurrency;
             this.messages = messages;
@@ -35,7 +34,7 @@ namespace AsyncDollsSimple.Dequeuing
             {
                 while (!token.IsCancellationRequested)
                 {
-                    await semaphore.WaitAsync(token);
+                    await semaphore.WaitAsync(token).ConfigureAwait(false);
 
                     TransportMessage message;
                     if (messages.TryDequeue(out message))
@@ -67,14 +66,7 @@ namespace AsyncDollsSimple.Dequeuing
         {
             tokenSource.Cancel();
 
-            try
-            {
-                await pumpTask.ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-            }
-
+            await pumpTask.IgnoreCancellation().ConfigureAwait(false);
             await Task.WhenAll(runningTasks.Values).ConfigureAwait(false);
 
             runningTasks.Clear();

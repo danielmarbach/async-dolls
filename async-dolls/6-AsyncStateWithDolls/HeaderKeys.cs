@@ -1,4 +1,4 @@
-namespace AsyncDollsSimple.Dequeuing
+namespace AsyncDolls.AsyncStateWithDolls
 {
     public static class HeaderKeys
     {

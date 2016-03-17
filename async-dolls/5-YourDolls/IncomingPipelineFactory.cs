@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AsyncDollsSimple.Dequeuing
+namespace AsyncDolls.YourDolls
 {
     public class IncomingPipelineFactory
     {

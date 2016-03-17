@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace AsyncDolls.YourPump
 {
     [TestFixture]
-    public class SimpleSpec
+    public class Spec
     {
         private AsyncCountdownEvent countdown;
 
@@ -34,11 +34,11 @@ namespace AsyncDolls.YourPump
             await strategy.StopAsync();
         }
 
-        public Task HandleMessage(TransportMessage message)
+        public async Task HandleMessage(TransportMessage message)
         {
+            await Task.Delay(1000).ConfigureAwait(false);
             message.Id.Output();
             countdown.Signal();
-            return Task.CompletedTask;
         }
     }
 }
