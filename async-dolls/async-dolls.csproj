@@ -246,6 +246,15 @@
     <Compile Include="7-AsyncDollsPartial\StepInstance.cs" />
     <Compile Include="7-AsyncDollsPartial\StepInvoker.cs" />
     <Compile Include="7-AsyncDollsPartial\TransportMessage.cs" />
+    <Compile Include="7-AsyncDollsRecurseFree\HeaderKeys.cs" />
+    <Compile Include="7-AsyncDollsRecurseFree\IIncomingStep.cs" />
+    <Compile Include="7-AsyncDollsRecurseFree\IncomingContext.cs" />
+    <Compile Include="7-AsyncDollsRecurseFree\IncomingPipeline.cs" />
+    <Compile Include="7-AsyncDollsRecurseFree\IncomingPipelineFactory.cs" />
+    <Compile Include="7-AsyncDollsRecurseFree\IPushMessages.cs" />
+    <Compile Include="7-AsyncDollsRecurseFree\PushMessages.cs" />
+    <Compile Include="7-AsyncDollsRecurseFree\Script.cs" />
+    <Compile Include="7-AsyncDollsRecurseFree\TransportMessage.cs" />
     <Compile Include="7-Comonad\Continuation.cs" />
     <Compile Include="7-Comonad\HeaderKeys.cs" />
     <Compile Include="7-Comonad\IIncomingStep.cs" />

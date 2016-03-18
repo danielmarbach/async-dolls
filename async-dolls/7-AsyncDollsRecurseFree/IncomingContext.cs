@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 
-namespace AsyncDolls.Comonaden
+namespace AsyncDolls.AsyncDollsRecurseFree
 {
     public class IncomingContext : Context
     {
@@ -13,6 +13,6 @@ namespace AsyncDolls.Comonaden
 
         public TransportMessage Message => Get<TransportMessage>();
 
-        public Queue<ExceptionDispatchInfo> Exceptions { get; }  
+        public Queue<ExceptionDispatchInfo> Exceptions { get; }
     }
 }
