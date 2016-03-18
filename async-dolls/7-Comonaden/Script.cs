@@ -11,7 +11,7 @@ namespace AsyncDolls.Comonaden
 
     [TestFixture]
     // This is just a playground. In practice this is highly innefficient.
-    public class Spec
+    public class Script
     {
         [Test]
         public async Task Do()
