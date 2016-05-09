@@ -265,6 +265,7 @@
     <Compile Include="7-Comonad\PushMessages.cs" />
     <Compile Include="7-Comonad\Script.cs" />
     <Compile Include="7-Comonad\TransportMessage.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Infrastructure\AsyncCountdownEvent.cs" />
     <Compile Include="Infrastructure\DanielMarbach.cs" />
     <Compile Include="Infrastructure\ProcessExtensions.cs" />
