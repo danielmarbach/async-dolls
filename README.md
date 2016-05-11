@@ -1,4 +1,15 @@
+# Async Dolls / Chain of Responsibility
+
+Please read the [LICENSE.md](License) agreement
+
+The font used in the slides is
+
+[Kaffeesatz](https://www.yanone.de/fonts/kaffeesatz/)
+
 # Links
+## About me
+* [Geeking out with Daniel Marbach]( http://developeronfire.com/episode-077-daniel-marbach-geeking-out)
+
 ## Async / Await
 * [Six Essential Tips for Async](http://channel9.msdn.com/Series/Three-Essential-Tips-for-Async)
 * [Asynchronous Programming with Async and Await](https://msdn.microsoft.com/en-us/library/hh191443.aspx)
