@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
@@ -130,7 +131,7 @@ namespace AsyncDolls
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine("We caught an exception for you");
+                    Console.WriteLine("We caught an exception for you.");
                 }
             };
 
@@ -150,6 +151,26 @@ namespace AsyncDolls
         {
             Console.WriteLine("Entering EvilMethod");
             throw new InvalidOperationException();
+        }
+
+        static async Task Retrier(Func<Task> next)
+        {
+            ExceptionDispatchInfo exceptionDispatchInfo = null;
+            for (int i = 0; i < 3; i++)
+            {
+                try
+                {
+                    await next();
+                    exceptionDispatchInfo = null;
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    exceptionDispatchInfo = ExceptionDispatchInfo.Capture(ex);
+                }
+            }
+
+            exceptionDispatchInfo?.Throw();
         }
     }
 }
