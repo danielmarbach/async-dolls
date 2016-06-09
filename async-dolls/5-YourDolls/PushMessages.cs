@@ -36,10 +36,10 @@ namespace AsyncDolls.YourDolls
                 {
                     await semaphore.WaitAsync(token).ConfigureAwait(false);
 
-                    TransportMessage message;
-                    if (messages.TryDequeue(out message))
+                    TransportMessage transportMessage;
+                    if (messages.TryDequeue(out transportMessage))
                     {
-                        var task = onMessageAsync(message);
+                        var task = onMessageAsync(transportMessage);
 
                         runningTasks.TryAdd(task, task);
 

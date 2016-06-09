@@ -5,13 +5,13 @@ using System.Threading.Tasks;
 
 namespace AsyncDolls.Comonaden
 {
-    public class IncomingPipeline
+    public class Chain
     {
-        readonly List<IIncomingStep> executingSteps;
+        readonly List<ILinkElement> executingElements;
 
-        public IncomingPipeline(IEnumerable<IIncomingStep> steps)
+        public Chain(IEnumerable<ILinkElement> steps)
         {
-            executingSteps = new List<IIncomingStep>(steps);
+            executingElements = new List<ILinkElement>(steps);
         }
 
         public Task Invoke(IncomingContext context)
@@ -23,12 +23,12 @@ namespace AsyncDolls.Comonaden
         {
             var continuations = new Stack<Continuation>();
             ExceptionDispatchInfo exception = null;
-            foreach (var step in executingSteps)
+            foreach (var element in executingElements)
             {
                 var continuation = Continuation.Empty;
                 try
                 {
-                    continuation = await step.Invoke(context).ConfigureAwait(false);
+                    continuation = await element.Invoke(context).ConfigureAwait(false);
                 }
                 catch (Exception e)
                 {

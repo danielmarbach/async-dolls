@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 
 namespace AsyncDolls.AsyncDollsPartial
 {
-    class StepInstance
+    class ElementInstance
     {
-        readonly IIncomingStep instance;
-        readonly IStepInvoker invoker;
+        readonly ILinkElement instance;
+        readonly IElementInvoker invoker;
 
-        public StepInstance(IIncomingStep instance)
+        public ElementInstance(ILinkElement instance)
         {
             this.instance = instance;
             invoker = CreateInvoker(instance);
@@ -28,11 +28,11 @@ namespace AsyncDolls.AsyncDollsPartial
         public bool IsAfter { get; }
         public bool IsSurround { get; }
 
-        static IStepInvoker CreateInvoker(IIncomingStep step)
+        static IElementInvoker CreateInvoker(ILinkElement step)
         {
-            var behaviorInterface = step.GetType().GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IIncomingStep<,>));
-            var invokerType = typeof(StepInvoker<,>).MakeGenericType(behaviorInterface.GetGenericArguments());
-            return (IStepInvoker)Activator.CreateInstance(invokerType);
+            var behaviorInterface = step.GetType().GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(ILinkElement<,>));
+            var invokerType = typeof(ElementInvoker<,>).MakeGenericType(behaviorInterface.GetGenericArguments());
+            return (IElementInvoker)Activator.CreateInstance(invokerType);
         }
 
         public Task Invoke(Context context, Func<Context, Task> next)

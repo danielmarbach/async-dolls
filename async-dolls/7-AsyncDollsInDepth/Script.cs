@@ -19,52 +19,52 @@ namespace AsyncDolls.AsyncDollsInDepth
 
             var countdown = new AsyncCountdownEvent(3);
 
-            var pipelineFactory = new IncomingPipelineFactory();
-            pipelineFactory.Register(() => new LogStep(countdown));
-            pipelineFactory.Register(() => new DelayBefore());
-            pipelineFactory.Register(() => new DelayBefore());
-            pipelineFactory.Register(() => new DelayBefore());
-            pipelineFactory.Register(() => new DelayBefore());
-            pipelineFactory.Register(() => new DelayBefore());
-            pipelineFactory.Register(() => new DelayBefore());
-            pipelineFactory.Register(() => new DelayAfter());
-            pipelineFactory.Register(() => new DelayAfter());
-            pipelineFactory.Register(() => new DelayAfter());
-            pipelineFactory.Register(() => new DelayAfter());
-            pipelineFactory.Register(() => new DelayAfter());
-            pipelineFactory.Register(() => new DelayInUsing());
-            pipelineFactory.Register(() => new DelayBefore());
-            pipelineFactory.Register(() => new DelayAfter());
-            pipelineFactory.Register(() => new DelayBefore());
-            pipelineFactory.Register(() => new DelayAfter());
-            pipelineFactory.Register(() => new PassThrough());
-            pipelineFactory.Register(() => new PassThrough());
-            pipelineFactory.Register(() => new PassThrough());
-            pipelineFactory.Register(() => new DelayInUsing());
-            pipelineFactory.Register(() => new DelayBefore());
-            pipelineFactory.Register(() => new DelayAfter());
-            pipelineFactory.Register(() => new PassThrough());
-            pipelineFactory.Register(() => new PassThrough());
-            pipelineFactory.Register(() => new PassThrough());
-            pipelineFactory.Register(() => new ThrowException());
+            var chainFactory = new ChainFactory();
+            chainFactory.Register(() => new LogElement(countdown));
+            chainFactory.Register(() => new DelayBefore());
+            chainFactory.Register(() => new DelayBefore());
+            chainFactory.Register(() => new DelayBefore());
+            chainFactory.Register(() => new DelayBefore());
+            chainFactory.Register(() => new DelayBefore());
+            chainFactory.Register(() => new DelayBefore());
+            chainFactory.Register(() => new DelayAfter());
+            chainFactory.Register(() => new DelayAfter());
+            chainFactory.Register(() => new DelayAfter());
+            chainFactory.Register(() => new DelayAfter());
+            chainFactory.Register(() => new DelayAfter());
+            chainFactory.Register(() => new DelayInUsing());
+            chainFactory.Register(() => new DelayBefore());
+            chainFactory.Register(() => new DelayAfter());
+            chainFactory.Register(() => new DelayBefore());
+            chainFactory.Register(() => new DelayAfter());
+            chainFactory.Register(() => new PassThrough());
+            chainFactory.Register(() => new PassThrough());
+            chainFactory.Register(() => new PassThrough());
+            chainFactory.Register(() => new DelayInUsing());
+            chainFactory.Register(() => new DelayBefore());
+            chainFactory.Register(() => new DelayAfter());
+            chainFactory.Register(() => new PassThrough());
+            chainFactory.Register(() => new PassThrough());
+            chainFactory.Register(() => new PassThrough());
+            chainFactory.Register(() => new ThrowException());
 
-            var strategy = new PushMessages(messages, maxConcurrency: 1);
+            var pushMessages = new PushMessages(messages, maxConcurrency: 1);
 
-            await strategy.StartAsync(tm => Connector(pipelineFactory, tm));
+            await pushMessages.StartAsync(tm => Connector(chainFactory, tm));
 
             await Task.Delay(2000);
 
-            await strategy.StopAsync();
+            await pushMessages.StopAsync();
         }
 
-        static Task Connector(IncomingPipelineFactory factory, TransportMessage message)
+        static Task Connector(ChainFactory factory, TransportMessage message)
         {
             var pipeline = factory.Create();
             var context = new IncomingContext(message);
             return pipeline.Invoke(context);
         }
 
-        class DelayBefore : IIncomingStep
+        class DelayBefore : ILinkElement
         {
             public async Task Invoke(IncomingContext context, Func<Task> next)
             {
@@ -73,7 +73,7 @@ namespace AsyncDolls.AsyncDollsInDepth
             }
         }
 
-        class DelayAfter : IIncomingStep
+        class DelayAfter : ILinkElement
         {
             public async Task Invoke(IncomingContext context, Func<Task> next)
             {
@@ -82,7 +82,7 @@ namespace AsyncDolls.AsyncDollsInDepth
             }
         }
 
-        public class ThrowException : IIncomingStep
+        public class ThrowException : ILinkElement
         {
             public async Task Invoke(IncomingContext context, Func<Task> next)
             {
@@ -92,7 +92,7 @@ namespace AsyncDolls.AsyncDollsInDepth
             }
         }
 
-        public class PassThrough : IIncomingStep
+        public class PassThrough : ILinkElement
         {
             public Task Invoke(IncomingContext context, Func<Task> next)
             {
@@ -100,7 +100,7 @@ namespace AsyncDolls.AsyncDollsInDepth
             }
         }
 
-        public class DelayInUsing : IIncomingStep
+        public class DelayInUsing : ILinkElement
         {
             public async Task Invoke(IncomingContext context, Func<Task> next)
             {
@@ -115,11 +115,11 @@ namespace AsyncDolls.AsyncDollsInDepth
             }
         }
 
-        class LogStep : IIncomingStep
+        class LogElement : ILinkElement
         {
             private AsyncCountdownEvent countdown;
 
-            public LogStep(AsyncCountdownEvent countdown)
+            public LogElement(AsyncCountdownEvent countdown)
             {
                 this.countdown = countdown;
             }

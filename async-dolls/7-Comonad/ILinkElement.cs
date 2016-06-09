@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace AsyncDolls.Comonaden
 {
-    public interface IIncomingStep
+    public interface ILinkElement
     {
         Task<Continuation> Invoke(IncomingContext context);
     }

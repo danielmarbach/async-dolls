@@ -24,23 +24,23 @@ namespace AsyncDolls.YourDolls
             };
         }
 
-        public TransportMessage(TransportMessage message)
+        public TransportMessage(TransportMessage transportMessage)
         {
             Headers = new Dictionary<string, string>
             {
-                {HeaderKeys.MessageId, message.Id},
-                {HeaderKeys.CorrelationId, message.CorrelationId},
-                {HeaderKeys.MessageType, message.MessageType},
-                {HeaderKeys.ReplyTo, message.ReplyTo?.ToString() }
+                {HeaderKeys.MessageId, transportMessage.Id},
+                {HeaderKeys.CorrelationId, transportMessage.CorrelationId},
+                {HeaderKeys.MessageType, transportMessage.MessageType},
+                {HeaderKeys.ReplyTo, transportMessage.ReplyTo?.ToString() }
             };
 
             var stream = new MemoryStream();
-            message.Body.Position = 0;
-            message.Body.CopyTo(stream);
+            transportMessage.Body.Position = 0;
+            transportMessage.Body.CopyTo(stream);
             stream.Position = 0;
             SetBody(stream);
 
-            foreach (var pair in message.Headers)
+            foreach (var pair in transportMessage.Headers)
             {
                 if (!Headers.ContainsKey(pair.Key))
                 {

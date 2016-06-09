@@ -4,20 +4,20 @@ using System.Threading.Tasks;
 
 namespace AsyncDolls.AsyncStateWithDollsTyped
 {
-    class StepInstance
+    class ElementInstance
     {
-        readonly IIncomingStep instance;
+        readonly ILinkElement instance;
         readonly IStepInvoker invoker;
 
-        public StepInstance(IIncomingStep instance)
+        public ElementInstance(ILinkElement instance)
         {
             this.instance = instance;
             invoker = CreateInvoker(instance);
         }
 
-        static IStepInvoker CreateInvoker(IIncomingStep step)
+        static IStepInvoker CreateInvoker(ILinkElement step)
         {
-            var behaviorInterface = step.GetType().GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IIncomingStep<,>));
+            var behaviorInterface = step.GetType().GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(ILinkElement<,>));
             var invokerType = typeof(StepInvoker<,>).MakeGenericType(behaviorInterface.GetGenericArguments());
             return (IStepInvoker)Activator.CreateInstance(invokerType);
         }

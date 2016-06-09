@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace AsyncDolls.AsyncStateWithDolls
 {
-    public interface IIncomingStep
+    public interface ILinkElement
     {
         Task Invoke(IncomingContext context, Func<Task> next);
     }

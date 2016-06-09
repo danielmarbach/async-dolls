@@ -3,13 +3,13 @@ using System.Threading.Tasks;
 
 namespace AsyncDolls.AsyncDollsInDepth
 {
-    public class IncomingPipeline
+    public class Chain
     {
-        readonly List<IIncomingStep> executingSteps;
+        readonly List<ILinkElement> executingElements;
 
-        public IncomingPipeline(IEnumerable<IIncomingStep> steps)
+        public Chain(IEnumerable<ILinkElement> elements)
         {
-            executingSteps = new List<IIncomingStep>(steps);
+            executingElements = new List<ILinkElement>(elements);
         }
 
         public Task Invoke(IncomingContext context)
@@ -19,14 +19,14 @@ namespace AsyncDolls.AsyncDollsInDepth
 
         Task InnerInvoke(IncomingContext context, int currentIndex = 0)
         {
-            if (currentIndex == executingSteps.Count)
+            if (currentIndex == executingElements.Count)
             {
                 return Task.CompletedTask;
             }
 
-            IIncomingStep step = executingSteps[currentIndex];
+            ILinkElement element = executingElements[currentIndex];
 
-            return step.Invoke(context, () => InnerInvoke(context, currentIndex + 1));
+            return element.Invoke(context, () => InnerInvoke(context, currentIndex + 1));
         }
     }
 }

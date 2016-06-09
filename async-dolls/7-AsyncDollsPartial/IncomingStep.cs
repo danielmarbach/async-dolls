@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace AsyncDolls.AsyncDollsPartial
 {
-    public abstract class SurroundStep<TContext> : IIncomingStep<TContext, TContext> 
+    public abstract class SurroundElement<TContext> : ILinkElement<TContext, TContext>
         where TContext : Context
     {
         public Task Invoke(TContext context, Func<TContext, Task> next)
@@ -14,7 +14,7 @@ namespace AsyncDolls.AsyncDollsPartial
         public abstract Task Invoke(TContext context, Func<Task> next);
     }
 
-    public abstract class BeforeStep<TContext> : IIncomingStep<TContext, TContext>
+    public abstract class BeforeElement<TContext> : ILinkElement<TContext, TContext>
         where TContext : Context
     {
         public async Task Invoke(TContext context, Func<TContext, Task> next)
@@ -26,7 +26,7 @@ namespace AsyncDolls.AsyncDollsPartial
         public abstract Task Invoke(TContext context);
     }
 
-    public abstract class AfterStep<TContext> : IIncomingStep<TContext, TContext>
+    public abstract class AfterElement<TContext> : ILinkElement<TContext, TContext>
     where TContext : Context
     {
         public async Task Invoke(TContext context, Func<TContext, Task> next)

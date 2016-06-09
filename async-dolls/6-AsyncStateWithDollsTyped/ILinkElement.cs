@@ -1,11 +1,11 @@
 using System;
 using System.Threading.Tasks;
 
-namespace AsyncDolls.AsyncDollsPartial
+namespace AsyncDolls.AsyncStateWithDollsTyped
 {
-    public interface IIncomingStep { }
+    public interface ILinkElement { }
 
-    public interface IIncomingStep<in TInContext, out TOutContext> : IIncomingStep
+    public interface ILinkElement<in TInContext, out TOutContext> : ILinkElement
         where TInContext : Context
         where TOutContext : Context
     {

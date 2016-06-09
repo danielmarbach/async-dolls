@@ -19,55 +19,55 @@ namespace AsyncDolls.AsyncDollsPartial
 
             var countdown = new AsyncCountdownEvent(3);
 
-            var pipelineFactory = new IncomingPipelineFactory();
-            pipelineFactory.Register(() => new SignalStep(countdown));
-            pipelineFactory.Register(() => new SwallowStep());
-            pipelineFactory.Register(() => new DelayPhysicalBefore());
-            pipelineFactory.Register(() => new DelayPhysicalAfter());
-            pipelineFactory.Register(() => new DelayPhysicalBefore());
-            pipelineFactory.Register(() => new DelayPhysicalAfter());
-            pipelineFactory.Register(() => new DelayPhysicalBefore());
-            pipelineFactory.Register(() => new DelayPhysicalAfter());
-            pipelineFactory.Register(() => new DelayPhysicalBefore());
-            pipelineFactory.Register(() => new DelayPhysicalAfter());
-            pipelineFactory.Register(() => new LogPhysical());
-            pipelineFactory.Register(() => new PhysicalToLogicalConnector());
-            pipelineFactory.Register(() => new DelayLogicalBefore());
-            pipelineFactory.Register(() => new DelayLogicalAfter());
-            pipelineFactory.Register(() => new DelayLogicalBefore());
-            pipelineFactory.Register(() => new DelayLogicalAfter());
-            pipelineFactory.Register(() => new DelayLogicalBefore());
-            pipelineFactory.Register(() => new DelayLogicalAfter());
-            pipelineFactory.Register(() => new DelayLogicalBefore());
-            pipelineFactory.Register(() => new DelayLogicalAfter());
-            pipelineFactory.Register(() => new DelayLogicalBefore());
-            pipelineFactory.Register(() => new DelayLogicalAfter());
-            pipelineFactory.Register(() => new DelayLogicalBefore());
-            pipelineFactory.Register(() => new DelayLogicalAfter());
-            pipelineFactory.Register(() => new DelayLogicalBefore());
-            pipelineFactory.Register(() => new DelayLogicalAfter());
-            pipelineFactory.Register(() => new DelayLogicalBefore());
-            pipelineFactory.Register(() => new DelayLogicalAfter());
-            pipelineFactory.Register(() => new LogLogical());
-            pipelineFactory.Register(() => new ThrowStep());
+            var chainFactory = new ChainFactory();
+            chainFactory.Register(() => new SignalElement(countdown));
+            chainFactory.Register(() => new SwallowElement());
+            chainFactory.Register(() => new DelayPhysicalBefore());
+            chainFactory.Register(() => new DelayPhysicalAfter());
+            chainFactory.Register(() => new DelayPhysicalBefore());
+            chainFactory.Register(() => new DelayPhysicalAfter());
+            chainFactory.Register(() => new DelayPhysicalBefore());
+            chainFactory.Register(() => new DelayPhysicalAfter());
+            chainFactory.Register(() => new DelayPhysicalBefore());
+            chainFactory.Register(() => new DelayPhysicalAfter());
+            chainFactory.Register(() => new LogPhysical());
+            chainFactory.Register(() => new PhysicalToLogicalConnector());
+            chainFactory.Register(() => new DelayLogicalBefore());
+            chainFactory.Register(() => new DelayLogicalAfter());
+            chainFactory.Register(() => new DelayLogicalBefore());
+            chainFactory.Register(() => new DelayLogicalAfter());
+            chainFactory.Register(() => new DelayLogicalBefore());
+            chainFactory.Register(() => new DelayLogicalAfter());
+            chainFactory.Register(() => new DelayLogicalBefore());
+            chainFactory.Register(() => new DelayLogicalAfter());
+            chainFactory.Register(() => new DelayLogicalBefore());
+            chainFactory.Register(() => new DelayLogicalAfter());
+            chainFactory.Register(() => new DelayLogicalBefore());
+            chainFactory.Register(() => new DelayLogicalAfter());
+            chainFactory.Register(() => new DelayLogicalBefore());
+            chainFactory.Register(() => new DelayLogicalAfter());
+            chainFactory.Register(() => new DelayLogicalBefore());
+            chainFactory.Register(() => new DelayLogicalAfter());
+            chainFactory.Register(() => new LogLogical());
+            chainFactory.Register(() => new ThrowElement());
 
-            var strategy = new PushMessages(messages, maxConcurrency: 1);
+            var pushMessages = new PushMessages(messages, maxConcurrency: 1);
 
-            await strategy.StartAsync(tm => Connector(pipelineFactory, tm));
+            await pushMessages.StartAsync(tm => Connector(chainFactory, tm));
 
             await countdown.WaitAsync();
 
-            await strategy.StopAsync();
+            await pushMessages.StopAsync();
         }
 
-        static Task Connector(IncomingPipelineFactory factory, TransportMessage message)
+        static Task Connector(ChainFactory factory, TransportMessage message)
         {
             var pipeline = factory.Create();
             var context = new IncomingPhysicalContext(message);
             return pipeline.Invoke(context);
         }
 
-        class DelayPhysicalBefore : BeforeStep<IncomingPhysicalContext>
+        class DelayPhysicalBefore : BeforeElement<IncomingPhysicalContext>
         {
             public override async Task Invoke(IncomingPhysicalContext context)
             {
@@ -75,7 +75,7 @@ namespace AsyncDolls.AsyncDollsPartial
             }
         }
 
-        class DelayPhysicalAfter : AfterStep<IncomingPhysicalContext>
+        class DelayPhysicalAfter : AfterElement<IncomingPhysicalContext>
         {
             public override async Task Invoke(IncomingPhysicalContext context)
             {
@@ -83,7 +83,7 @@ namespace AsyncDolls.AsyncDollsPartial
             }
         }
 
-        class LogPhysical : BeforeStep<IncomingPhysicalContext>
+        class LogPhysical : BeforeElement<IncomingPhysicalContext>
         {
             public override Task Invoke(IncomingPhysicalContext context)
             {
@@ -92,7 +92,7 @@ namespace AsyncDolls.AsyncDollsPartial
             }
         }
 
-        class PhysicalToLogicalConnector : StepConnector<IncomingPhysicalContext, IncomingLogicalContext>
+        class PhysicalToLogicalConnector : ElementConnector<IncomingPhysicalContext, IncomingLogicalContext>
         {
             public override Task Invoke(IncomingPhysicalContext context, Func<IncomingLogicalContext, Task> next)
             {
@@ -100,7 +100,7 @@ namespace AsyncDolls.AsyncDollsPartial
             }
         }
 
-        class DelayLogicalBefore : BeforeStep<IncomingLogicalContext>
+        class DelayLogicalBefore : BeforeElement<IncomingLogicalContext>
         {
             public override async Task Invoke(IncomingLogicalContext context)
             {
@@ -108,7 +108,7 @@ namespace AsyncDolls.AsyncDollsPartial
             }
         }
 
-        class DelayLogicalAfter : AfterStep<IncomingLogicalContext>
+        class DelayLogicalAfter : AfterElement<IncomingLogicalContext>
         {
             public override async Task Invoke(IncomingLogicalContext context)
             {
@@ -116,7 +116,7 @@ namespace AsyncDolls.AsyncDollsPartial
             }
         }
 
-        class LogLogical : BeforeStep<IncomingLogicalContext>
+        class LogLogical : BeforeElement<IncomingLogicalContext>
         {
             public override Task Invoke(IncomingLogicalContext context)
             {
@@ -125,11 +125,11 @@ namespace AsyncDolls.AsyncDollsPartial
             }
         }
 
-        class SignalStep : AfterStep<IncomingPhysicalContext>
+        class SignalElement : AfterElement<IncomingPhysicalContext>
         {
             private readonly AsyncCountdownEvent countdown;
 
-            public SignalStep(AsyncCountdownEvent countdown)
+            public SignalElement(AsyncCountdownEvent countdown)
             {
                 this.countdown = countdown;
             }
@@ -141,7 +141,7 @@ namespace AsyncDolls.AsyncDollsPartial
             }
         }
 
-        class SwallowStep : SurroundStep<IncomingPhysicalContext>
+        class SwallowElement : SurroundElement<IncomingPhysicalContext>
         {
             public override async Task Invoke(IncomingPhysicalContext context, Func<Task> next)
             {
@@ -156,7 +156,7 @@ namespace AsyncDolls.AsyncDollsPartial
             }
         }
 
-        class ThrowStep : BeforeStep<IncomingLogicalContext>
+        class ThrowElement : BeforeElement<IncomingLogicalContext>
         {
             public override async Task Invoke(IncomingLogicalContext context)
             {

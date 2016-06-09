@@ -23,7 +23,7 @@ namespace AsyncDolls.Comonaden
 
             var countdown = new AsyncCountdownEvent(3);
 
-            var pipelineFactory = new IncomingPipelineFactory();
+            var pipelineFactory = new ChainFactory();
             pipelineFactory.Register(() => new LogStep(countdown));
             pipelineFactory.Register(() => new DelayBefore());
             pipelineFactory.Register(() => new DelayBefore());
@@ -61,14 +61,14 @@ namespace AsyncDolls.Comonaden
             await strategy.StopAsync();
         }
 
-        static Task Connector(IncomingPipelineFactory factory, TransportMessage message)
+        static Task Connector(ChainFactory factory, TransportMessage message)
         {
             var pipeline = factory.Create();
             var context = new IncomingContext(message);
             return pipeline.Invoke(context);
         }
 
-        class DelayBefore : IIncomingStep
+        class DelayBefore : ILinkElement
         {
             public async Task<Continuation> Invoke(IncomingContext context)
             {
@@ -78,7 +78,7 @@ namespace AsyncDolls.Comonaden
             }
         }
 
-        class DelayAfter : IIncomingStep
+        class DelayAfter : ILinkElement
         {
             public Task<Continuation> Invoke(IncomingContext context)
             {
@@ -89,7 +89,7 @@ namespace AsyncDolls.Comonaden
             }
         }
 
-        public class ThrowException : IIncomingStep
+        public class ThrowException : ILinkElement
         {
             public async Task<Continuation> Invoke(IncomingContext context)
             {
@@ -99,7 +99,7 @@ namespace AsyncDolls.Comonaden
             }
         }
 
-        public class PassThrough : IIncomingStep
+        public class PassThrough : ILinkElement
         {
             public Task<Continuation> Invoke(IncomingContext context)
             {
@@ -107,7 +107,7 @@ namespace AsyncDolls.Comonaden
             }
         }
 
-        public class DelayInUsing : IIncomingStep
+        public class DelayInUsing : ILinkElement
         {
             public async Task<Continuation> Invoke(IncomingContext context)
             {
@@ -122,7 +122,7 @@ namespace AsyncDolls.Comonaden
             }
         }
 
-        class LogStep : IIncomingStep
+        class LogStep : ILinkElement
         {
             private AsyncCountdownEvent countdown;
 

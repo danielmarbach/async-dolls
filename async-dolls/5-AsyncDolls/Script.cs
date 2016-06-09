@@ -137,10 +137,11 @@ namespace AsyncDolls
 
             var actions = new List<Func<Func<Task>, Task>>
             {
+                Retrier,
                 MethodAsync1,
                 MethodAsync2,
                 MethodAsync3,
-                exceptionHandler,
+                //exceptionHandler,
                 EvilMethod
             };
 

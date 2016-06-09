@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace AsyncDolls.AsyncStateWithDollsTyped
 {
-    public abstract class IncomingStep<TContext> : IIncomingStep<TContext, TContext> 
+    public abstract class LinkElement<TContext> : ILinkElement<TContext, TContext>
         where TContext : Context
     {
         public Task Invoke(TContext context, Func<TContext, Task> next)

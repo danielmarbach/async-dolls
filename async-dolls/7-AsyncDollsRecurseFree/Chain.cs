@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace AsyncDolls.AsyncDollsRecurseFree
 {
-    public class IncomingPipeline
+    public class Chain
     {
-        readonly List<IIncomingStep> executingSteps;
+        readonly List<ILinkElement> executingElements;
 
-        public IncomingPipeline(IEnumerable<IIncomingStep> steps)
+        public Chain(IEnumerable<ILinkElement> elements)
         {
-            executingSteps = new List<IIncomingStep>(steps);
+            executingElements = new List<ILinkElement>(elements);
         }
 
         public async Task Invoke(IncomingContext context)
@@ -22,15 +22,15 @@ namespace AsyncDolls.AsyncDollsRecurseFree
             var semaphore = new SemaphoreSlim(1);
             Stack<Tuple<Task, TaskCompletionSource<ExceptionDispatchInfo>>> sources = new Stack<Tuple<Task, TaskCompletionSource<ExceptionDispatchInfo>>>();
 
-            while (currentIndex < executingSteps.Count)
+            while (currentIndex < executingElements.Count)
             {
                 await semaphore.WaitAsync().ConfigureAwait(false);
 
-                var behavior = executingSteps[currentIndex];
+                var element = executingElements[currentIndex];
                 currentIndex += 1;
 
                 var tcs = new TaskCompletionSource<ExceptionDispatchInfo>();
-                var task = behavior.Invoke(context, () =>
+                var task = element.Invoke(context, () =>
                 {
                     semaphore.Release();
                     return tcs.Task;

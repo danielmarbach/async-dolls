@@ -18,28 +18,28 @@ namespace AsyncDolls.AsyncStateWithDolls
 
             var countdown = new AsyncCountdownEvent(3);
 
-            var pipelineFactory = new IncomingPipelineFactory();
-            pipelineFactory.Register(() => new DelayStep());
-            pipelineFactory.Register(() => new LogStep());
-            pipelineFactory.Register(() => new DecrementStep(countdown));
+            var chainFactory = new ChainFactory();
+            chainFactory.Register(() => new DelayElement());
+            chainFactory.Register(() => new LogElement());
+            chainFactory.Register(() => new DecrementElement(countdown));
 
-            var strategy = new PushMessages(messages, maxConcurrency: 1);
+            var pushMessages = new PushMessages(messages, maxConcurrency: 1);
 
-            await strategy.StartAsync(tm => Connector(pipelineFactory, tm));
+            await pushMessages.StartAsync(tm => Connector(chainFactory, tm));
 
             await countdown.WaitAsync();
 
-            await strategy.StopAsync();
+            await pushMessages.StopAsync();
         }
 
-        static Task Connector(IncomingPipelineFactory factory, TransportMessage message)
+        static Task Connector(ChainFactory factory, TransportMessage message)
         {
             var pipeline = factory.Create();
             var context = new IncomingContext(message);
             return pipeline.Invoke(context);
         }
 
-        class DelayStep : IIncomingStep
+        class DelayElement : ILinkElement
         {
             public async Task Invoke(IncomingContext context, Func<Task> next)
             {
@@ -48,7 +48,7 @@ namespace AsyncDolls.AsyncStateWithDolls
             }
         }
 
-        class LogStep : IIncomingStep
+        class LogElement : ILinkElement
         {
             public Task Invoke(IncomingContext context, Func<Task> next)
             {
@@ -57,11 +57,11 @@ namespace AsyncDolls.AsyncStateWithDolls
             }
         }
 
-        class DecrementStep : IIncomingStep
+        class DecrementElement : ILinkElement
         {
             private readonly AsyncCountdownEvent countdown;
 
-            public DecrementStep(AsyncCountdownEvent countdown)
+            public DecrementElement(AsyncCountdownEvent countdown)
             {
                 this.countdown = countdown;
             }

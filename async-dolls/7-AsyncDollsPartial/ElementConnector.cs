@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace AsyncDolls.AsyncDollsPartial
 {
-    public abstract class StepConnector<TInContext, TOutContext> : IIncomingStep<TInContext, TOutContext>
+    public abstract class ElementConnector<TInContext, TOutContext> : ILinkElement<TInContext, TOutContext>
         where TInContext : Context
         where TOutContext : Context
     {

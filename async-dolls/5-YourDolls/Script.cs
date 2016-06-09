@@ -18,54 +18,54 @@ namespace AsyncDolls.YourDolls
 
             var countdown = new AsyncCountdownEvent(3);
 
-            var pipelineFactory = new IncomingPipelineFactory();
-            pipelineFactory.Register(() => new DelayStep());
-            pipelineFactory.Register(() => new LogStep());
-            pipelineFactory.Register(() => new DecrementStep(countdown));
+            var chainFactory = new ChainFactory();
+            chainFactory.Register(() => new DelayElement());
+            chainFactory.Register(() => new LogElement());
+            chainFactory.Register(() => new DecrementElement(countdown));
 
-            var strategy = new PushMessages(messages, maxConcurrency: 1);
+            var pushMessages = new PushMessages(messages, maxConcurrency: 1);
 
-            await strategy.StartAsync(tm => Connector(pipelineFactory, tm));
+            await pushMessages.StartAsync(tm => Connector(chainFactory, tm));
 
             await countdown.WaitAsync();
 
-            await strategy.StopAsync();
+            await pushMessages.StopAsync();
         }
 
-        static Task Connector(IncomingPipelineFactory factory, TransportMessage message)
+        static Task Connector(ChainFactory factory, TransportMessage transportMessage)
         {
             var pipeline = factory.Create();
-            return pipeline.Invoke(message);
+            return pipeline.Invoke(transportMessage);
         }
 
-        class DelayStep : IIncomingStep
+        class DelayElement : ILinkElement
         {
-            public async Task Invoke(TransportMessage message, Func<Task> next)
+            public async Task Invoke(TransportMessage transportMessage, Func<Task> next)
             {
                 await Task.Delay(1000).ConfigureAwait(false);
                 await next().ConfigureAwait(false);
             }
         }
 
-        class LogStep : IIncomingStep
+        class LogElement : ILinkElement
         {
-            public Task Invoke(TransportMessage message, Func<Task> next)
+            public Task Invoke(TransportMessage transportMessage, Func<Task> next)
             {
-                message.Id.Output();
+                transportMessage.Id.Output();
                 return next();
             }
         }
 
-        class DecrementStep : IIncomingStep
+        class DecrementElement : ILinkElement
         {
             private readonly AsyncCountdownEvent countdown;
 
-            public DecrementStep(AsyncCountdownEvent countdown)
+            public DecrementElement(AsyncCountdownEvent countdown)
             {
                 this.countdown = countdown;
             }
 
-            public Task Invoke(TransportMessage message, Func<Task> next)
+            public Task Invoke(TransportMessage transportMessage, Func<Task> next)
             {
                 countdown.Signal();
                 return next();
