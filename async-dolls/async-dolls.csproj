@@ -122,6 +122,7 @@
     <Compile Include="5-AsyncDolls\Dequeuing\MessageReceiverEndpointConfigurationReadonlyExtensions.cs" />
     <Compile Include="5-AsyncDolls\Dequeuing\MessageReceiverReceiver.cs" />
     <Compile Include="5-AsyncDolls\Dequeuing\NoOpDequeStrategy.cs" />
+    <Compile Include="5-AsyncDolls\DishStillWetException.cs" />
     <Compile Include="5-AsyncDolls\EndpointConfiguration.cs" />
     <Compile Include="5-AsyncDolls\HeaderKeys.cs" />
     <Compile Include="5-AsyncDolls\IBus.cs" />
@@ -228,7 +229,7 @@
     <Compile Include="6-AsyncStateWithDollsTyped\LogicalMessage.cs" />
     <Compile Include="6-AsyncStateWithDollsTyped\PushMessages.cs" />
     <Compile Include="6-AsyncStateWithDollsTyped\Script.cs" />
-    <Compile Include="6-AsyncStateWithDollsTyped\StepConnector.cs" />
+    <Compile Include="6-AsyncStateWithDollsTyped\ElementConnector.cs" />
     <Compile Include="6-AsyncStateWithDollsTyped\ElementInstance.cs" />
     <Compile Include="6-AsyncStateWithDollsTyped\StepInvoker.cs" />
     <Compile Include="6-AsyncStateWithDollsTyped\TransportMessage.cs" />

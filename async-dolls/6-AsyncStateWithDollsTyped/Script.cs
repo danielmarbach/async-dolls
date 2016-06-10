@@ -58,7 +58,7 @@ namespace AsyncDolls.AsyncStateWithDollsTyped
             }
         }
 
-        class PhysicalToLogicalConnector : StepConnector<IncomingPhysicalContext, IncomingLogicalContext>
+        class PhysicalToLogicalConnector : ElementConnector<IncomingPhysicalContext, IncomingLogicalContext>
         {
             public override Task Invoke(IncomingPhysicalContext context, Func<IncomingLogicalContext, Task> next)
             {
