@@ -287,6 +287,15 @@
     <Compile Include="7-Comonad\PushMessages.cs" />
     <Compile Include="7-Comonad\Script.cs" />
     <Compile Include="7-Comonad\TransportMessage.cs" />
+    <Compile Include="7-Expressions\Chain.cs" />
+    <Compile Include="7-Expressions\ChainFactory.cs" />
+    <Compile Include="7-Expressions\HeaderKeys.cs" />
+    <Compile Include="7-Expressions\ILinkElement.cs" />
+    <Compile Include="7-Expressions\IncomingContext.cs" />
+    <Compile Include="7-Expressions\IPushMessages.cs" />
+    <Compile Include="7-Expressions\PushMessages.cs" />
+    <Compile Include="7-Expressions\Script.cs" />
+    <Compile Include="7-Expressions\TransportMessage.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Infrastructure\AsyncCountdownEvent.cs" />
     <Compile Include="Infrastructure\DanielMarbach.cs" />
