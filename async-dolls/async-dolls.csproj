@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AsyncDolls</RootNamespace>
     <AssemblyName>async-dolls</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -72,6 +72,9 @@
     <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.1.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.3.0\lib\portable-net45+win8+wp8+wpa81\System.Threading.Tasks.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="System.Transactions" />
     <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -296,6 +299,7 @@
     <Compile Include="7-Expressions\PushMessages.cs" />
     <Compile Include="7-Expressions\Script.cs" />
     <Compile Include="7-Expressions\TransportMessage.cs" />
+    <Compile Include="8-ValueTask\Script.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Infrastructure\AsyncCountdownEvent.cs" />
     <Compile Include="Infrastructure\DanielMarbach.cs" />
@@ -312,6 +316,9 @@
     <Content Include="2-AsyncTransactions\DatabaseTests.StoreAsync.approved.txt" />
     <Content Include="2-AsyncTransactions\DatabaseTests.StoreAsyncSupportsAmbientTransactionComplete.approved.txt" />
     <Content Include="2-AsyncTransactions\DatabaseTests.StoreAsyncSupportsAmbientTransactionRollback.approved.txt" />
+    <Content Include="8-ValueTask\values.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
