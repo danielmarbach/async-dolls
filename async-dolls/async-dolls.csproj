@@ -300,6 +300,7 @@
     <Compile Include="7-Expressions\Script.cs" />
     <Compile Include="7-Expressions\TransportMessage.cs" />
     <Compile Include="8-ValueTask\Script.cs" />
+    <Compile Include="9-NotifyCompletion\Script.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Infrastructure\AsyncCountdownEvent.cs" />
     <Compile Include="Infrastructure\DanielMarbach.cs" />
