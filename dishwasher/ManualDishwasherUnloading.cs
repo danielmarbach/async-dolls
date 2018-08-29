@@ -10,9 +10,6 @@ namespace dishwasher
         [Test]
         public void Unload()
         {
-            //
-            Son();
-            Wife();
         }
 
         public static void Son()
