@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2016
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "async-dolls", "async-dolls\async-dolls.csproj", "{B2755821-FB74-4D92-B54C-3DC778B5CD64}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "configureawait", "configureawait\configureawait.csproj", "{11D966E5-54C8-48E4-B4BC-F2248C9CDEEF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dishwasher", "dishwasher\dishwasher.csproj", "{D66DA196-8B57-4ACB-8D3C-223FC42E3864}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,8 +23,15 @@ Global
 		{11D966E5-54C8-48E4-B4BC-F2248C9CDEEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11D966E5-54C8-48E4-B4BC-F2248C9CDEEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11D966E5-54C8-48E4-B4BC-F2248C9CDEEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D66DA196-8B57-4ACB-8D3C-223FC42E3864}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D66DA196-8B57-4ACB-8D3C-223FC42E3864}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D66DA196-8B57-4ACB-8D3C-223FC42E3864}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D66DA196-8B57-4ACB-8D3C-223FC42E3864}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {284C7E65-D1FE-4D47-B0BB-A679DBC24FA2}
 	EndGlobalSection
 EndGlobal

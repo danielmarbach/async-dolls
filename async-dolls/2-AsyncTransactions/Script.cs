@@ -28,7 +28,6 @@ namespace AsyncDolls
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         [TestCase("EntityFramework")]
         public void TheStart(string EntityFramework = null)
         {
@@ -65,7 +64,6 @@ namespace AsyncDolls
 
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))] // Normally never use those
         public async Task TransactionScopeAsync()
         {
             Assert.Null(Transaction.Current);
