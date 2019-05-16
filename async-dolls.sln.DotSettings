@@ -50,6 +50,34 @@
             {&#xD;
                 return;&#xD;
             }</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=5E4485A87ACFE542A0428B6DF25975F8/@KeyIndexDefined">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=5E4485A87ACFE542A0428B6DF25975F8/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=5E4485A87ACFE542A0428B6DF25975F8/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=5E4485A87ACFE542A0428B6DF25975F8/Scope/=C3001E7C0DA78E4487072B7E050D86C5/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=5E4485A87ACFE542A0428B6DF25975F8/Scope/=C3001E7C0DA78E4487072B7E050D86C5/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=5E4485A87ACFE542A0428B6DF25975F8/Scope/=C3001E7C0DA78E4487072B7E050D86C5/Type/@EntryValue">InCSharpFile</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=5E4485A87ACFE542A0428B6DF25975F8/Shortcut/@EntryValue">async-auto-1</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=5E4485A87ACFE542A0428B6DF25975F8/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=5E4485A87ACFE542A0428B6DF25975F8/Text/@EntryValue">static async Task Retrier(Func&lt;Task&gt; next)&#xD;
+{&#xD;
+    ExceptionDispatchInfo exceptionDispatchInfo = null;&#xD;
+    for (int i = 0; i &lt; 3; i++)&#xD;
+    {&#xD;
+        try&#xD;
+        {&#xD;
+            await next().ConfigureAwait(false);&#xD;
+            exceptionDispatchInfo = null;&#xD;
+            break;&#xD;
+        }&#xD;
+        catch (Exception ex)&#xD;
+        {&#xD;
+            exceptionDispatchInfo = ExceptionDispatchInfo.Capture(ex);&#xD;
+			await Task.Delay(1000).ConfigureAwait(false);&#xD;
+        }&#xD;
+    }&#xD;
+&#xD;
+    exceptionDispatchInfo?.Throw();&#xD;
+}</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=86D2B307A26642409002A0E98F4A17AA/@KeyIndexDefined">True</s:Boolean>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=86D2B307A26642409002A0E98F4A17AA/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=86D2B307A26642409002A0E98F4A17AA/Reformat/@EntryValue">True</s:Boolean>
